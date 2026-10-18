@@ -1,5 +1,17 @@
-import React, { useState, useRef } from 'react';
-import { Download, Copy, Check, RotateCcw, FileText } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Download,
+  Copy,
+  Check,
+  RotateCcw,
+  FileText,
+  Bold,
+  Italic,
+  Underline,
+  Heading1,
+  Heading2,
+  List
+} from 'lucide-react';
 import { CubeLoader } from './CubeLoader';
 
 export interface ClayContainerProps {
@@ -20,29 +32,49 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
   const [internalText, setInternalText] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   const text = externalText !== undefined ? externalText : internalText;
   const hasContent = Boolean(text && text.trim().length > 0);
 
-  const handleTextChange = (newText: string) => {
+  // Sync external text into editor when updated
+  useEffect(() => {
+    if (editorRef.current && text !== undefined) {
+      if (editorRef.current.innerHTML !== text && editorRef.current.innerText.trim() !== text.trim()) {
+        editorRef.current.innerHTML = text.includes('<') ? text : text.replace(/\n/g, '<br/>');
+      }
+    }
+  }, [text]);
+
+  const handleInput = () => {
+    if (!editorRef.current) return;
+    const newHtml = editorRef.current.innerHTML;
     if (onTranscriptChange) {
-      onTranscriptChange(newText);
+      onTranscriptChange(newHtml);
     } else {
-      setInternalText(newText);
+      setInternalText(newHtml);
+    }
+  };
+
+  const executeCommand = (command: string, value: string | undefined = undefined) => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      handleInput();
     }
   };
 
   const handleCopy = () => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
+    if (!editorRef.current && !text) return;
+    const plainText = editorRef.current ? editorRef.current.innerText : text.replace(/<[^>]*>/g, '');
+    navigator.clipboard.writeText(plainText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownloadTxt = () => {
     if (!hasContent) return;
-    const textToSave = text.trim() ? text : 'Empty transcription buffer.';
+    const plainText = editorRef.current ? editorRef.current.innerText : text.replace(/<[^>]*>/g, '');
+    const textToSave = plainText.trim() ? plainText : 'Empty transcription buffer.';
     const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -58,9 +90,10 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
     setTimeout(() => setDownloadSuccess(false), 2000);
   };
 
-  const wordCount = hasContent ? text.trim().split(/\s+/).length : 0;
-  const charCount = hasContent ? text.length : 0;
-  const lines = hasContent ? text.split('\n') : [];
+  const plainTextContent = text.replace(/<[^>]*>/g, ' ');
+  const wordCount = hasContent ? plainTextContent.trim().split(/\s+/).filter(Boolean).length : 0;
+  const charCount = hasContent ? plainTextContent.length : 0;
+  const lines = hasContent ? (editorRef.current ? editorRef.current.innerText.split('\n') : text.split('\n')) : [];
 
   return (
     <div className={`relative select-none w-full h-full ${className}`} style={style}>
@@ -138,7 +171,11 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
               {hasContent && (
                 <button
                   type="button"
-                  onClick={() => handleTextChange('')}
+                  onClick={() => {
+                    if (editorRef.current) editorRef.current.innerHTML = '';
+                    if (onTranscriptChange) onTranscriptChange('');
+                    else setInternalText('');
+                  }}
                   className="px-2.5 py-1.5 min-h-[32px] text-xs border border-zinc-800 hover:border-zinc-600 bg-black hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 active:scale-95"
                   title="Clear text buffer"
                 >
@@ -205,44 +242,106 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
           </div>
 
           {/* Screen Body */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-black p-4 sm:p-5 text-xs sm:text-sm leading-relaxed text-zinc-200">
+          <div className="flex-1 flex flex-col overflow-hidden bg-black p-3 sm:p-4 text-xs sm:text-sm leading-relaxed text-zinc-200">
             {hasContent ? (
               <>
-                {/* Clean Status Meta Header */}
-                <div className="select-none pb-2.5 border-b border-zinc-900 flex items-center justify-between text-xs text-zinc-400">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-zinc-400 inline-block"></span>
-                    <span className="text-zinc-200 font-medium">Ready</span>
-                    <span className="text-zinc-700">•</span>
-                    <span>{lines.length} lines</span>
-                    <span className="text-zinc-700">•</span>
-                    <span>{wordCount} words</span>
-                  </div>
-                  <div className="text-[11px] text-zinc-500 hidden sm:block">
-                    Editable text buffer
+                {/* Format Teks Toolbar (B, I, U, H1, H2, List, Reset) matching TranscribeStudio */}
+                <div className="w-full rounded-none bg-[#090a0f] border border-zinc-800 p-1.5 sm:p-2 mb-2.5 flex items-center flex-wrap gap-1 select-none">
+                  <span className="text-[11px] font-mono text-zinc-500 uppercase px-1.5 sm:px-2">
+                    FORMAT TEKS:
+                  </span>
+
+                  {/* Bold (B) */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('bold')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Tebal (Bold)"
+                  >
+                    <Bold className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Italic (I) */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('italic')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Miring (Italic)"
+                  >
+                    <Italic className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Underline (U) */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('underline')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Garis Bawah (Underline)"
+                  >
+                    <Underline className="w-3.5 h-3.5" />
+                  </button>
+
+                  <div className="h-4 w-px bg-zinc-800 mx-1" />
+
+                  {/* Heading 1 */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('formatBlock', '<h1>')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Judul H1"
+                  >
+                    <Heading1 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Heading 2 */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('formatBlock', '<h2>')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Subjudul H2"
+                  >
+                    <Heading2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Bullet List */}
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('insertUnorderedList')}
+                    className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
+                    title="Daftar Poin (List)"
+                  >
+                    <List className="w-3.5 h-3.5" />
+                  </button>
+
+                  <div className="h-4 w-px bg-zinc-800 mx-1" />
+
+                  <button
+                    type="button"
+                    onClick={() => executeCommand('removeFormat')}
+                    className="text-[11px] font-mono px-2 py-1 rounded-none border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white transition-colors active:scale-95"
+                    title="Hapus Pemformatan"
+                  >
+                    Reset
+                  </button>
+
+                  <div className="ml-auto text-[11px] font-mono text-zinc-500 pr-1 sm:pr-2 flex items-center gap-2">
+                    <span>{wordCount} kata</span>
+                    <span className="text-zinc-700 hidden sm:inline">•</span>
+                    <span className="text-emerald-400 font-sans hidden sm:inline">Editable</span>
                   </div>
                 </div>
 
-                {/* Line Numbers Gutter & Interactive Text Buffer */}
-                <div className="flex-1 flex pt-3 overflow-hidden relative">
-                  <div className="select-none pr-3.5 py-1 text-right font-mono text-xs text-zinc-700 border-r border-zinc-900/80 w-10 shrink-0 hidden sm:block">
-                    {lines.map((_, i) => (
-                      <div key={i} className="leading-6">
-                        {String(i + 1).padStart(2, '0')}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex-1 h-full flex flex-col pl-3 sm:pl-4 overflow-hidden relative">
-                    <textarea
-                      ref={textareaRef}
-                      value={text}
-                      onChange={(e) => handleTextChange(e.target.value)}
-                      placeholder="Transcript will appear here once audio is processed..."
-                      className="w-full h-full bg-transparent text-zinc-200 font-mono text-xs sm:text-sm leading-6 resize-none focus:outline-none terminal-scrollbar selection:bg-zinc-700 selection:text-white"
-                      spellCheck={false}
-                    />
-                  </div>
+                {/* Rich ContentEditable Text Buffer Container */}
+                <div className="flex-1 flex overflow-hidden relative border border-zinc-900/80 bg-black">
+                  <div
+                    ref={editorRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleInput}
+                    dangerouslySetInnerHTML={{ __html: text.includes('<') ? text : text.replace(/\n/g, '<br/>') }}
+                    className="w-full h-full p-3.5 sm:p-4 overflow-y-auto bg-transparent text-zinc-200 text-xs sm:text-sm leading-relaxed focus:outline-none focus:border-zinc-700 terminal-scrollbar selection:bg-zinc-800 selection:text-white font-sans"
+                    spellCheck={false}
+                  />
                 </div>
               </>
             ) : (
