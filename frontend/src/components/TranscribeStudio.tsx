@@ -331,16 +331,6 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
             </div>
           )}
 
-          {/* Minimal drag indicator saat user melayangkan file di atas kanvas */}
-          {isDragging && !selectedFile && (
-            <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center pointer-events-none">
-              <div className="px-4 py-1.5 bg-black/90 border border-emerald-500/80 text-[11px] font-mono text-emerald-300 uppercase tracking-widest shadow-xl flex items-center gap-2">
-                <span className="w-2 h-2 bg-emerald-400 animate-ping" />
-                <span>Lepaskan MP3 / video untuk memproses &amp; memindai</span>
-              </div>
-            </div>
-          )}
-
           {/* Selected File Details Overlay */}
           {selectedFile && (
             <div className="absolute inset-0 flex items-center justify-center p-6 z-10 pointer-events-auto">
