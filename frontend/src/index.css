@@ -1,0 +1,145 @@
+@font-face {
+  font-family: 'Notura';
+  src: url('/fonts/notura.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --frame: #070b12;
+  --accent: #10b981;
+  --card-primary: #064e3b;
+  --card-secondary: #0b1e16;
+}
+
+@layer base {
+  body {
+    @apply bg-[#070b12] text-slate-100 antialiased selection:bg-emerald-500 selection:text-black;
+    font-family: 'Geist', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Geist', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* React Bits Pro Signature Rounded Frame */
+.site-frame {
+  z-index: 9999;
+  pointer-events: none;
+  background-color: var(--frame);
+  display: block;
+  position: fixed;
+}
+.site-frame--top {
+  height: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+.site-frame--bottom {
+  height: 10px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.site-frame--left {
+  width: 10px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+.site-frame--right {
+  width: 10px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+}
+.site-corner {
+  z-index: 9998;
+  pointer-events: none;
+  color: var(--frame);
+  display: block;
+  position: fixed;
+}
+.site-corner--top-left {
+  top: 10px;
+  left: 10px;
+  transform: rotate(90deg);
+}
+.site-corner--top-right {
+  top: 10px;
+  right: 10px;
+  transform: rotate(180deg);
+}
+.site-corner--bottom-left {
+  bottom: 10px;
+  left: 10px;
+  transform: rotate(0);
+}
+.site-corner--bottom-right {
+  bottom: 10px;
+  right: 10px;
+  transform: rotate(270deg);
+}
+
+@media (max-width: 850px) {
+  .site-frame,
+  .site-corner {
+    display: none;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shine {
+  animation: shine 4s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

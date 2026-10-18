@@ -1,0 +1,8 @@
+.shiny-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.shiny-text-segment {
+  display: inline-block;
+}
