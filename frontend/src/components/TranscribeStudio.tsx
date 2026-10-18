@@ -150,7 +150,9 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
 
       setProcessingStep('Menjalankan transkripsi ultra-cepat & ekstraksi notula...');
 
-      const response = await fetch('http://localhost:8000/api/process', {
+      const configuredBackendUrl = (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) || 'http://localhost:8000';
+      const cleanBaseUrl = configuredBackendUrl.replace(/\/+$/, '');
+      const response = await fetch(`${cleanBaseUrl}/api/process`, {
         method: 'POST',
         body: formData
       });
