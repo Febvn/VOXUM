@@ -129,13 +129,13 @@ export function App() {
         onTranscriptionComplete={handleTranscriptionComplete}
       />
 
-      {/* Grid Continuation Page directly below Audio Drop (Full screen orthogonal grid with 4x8 box claymorphic container) */}
+      {/* Grid Continuation Page directly below Audio Drop (Full screen orthogonal grid with claymorphic container) */}
       <section
         id="studio-grid-continuation"
         aria-label="Studio Grid Continuation"
-        className="relative w-full overflow-hidden bg-black select-none min-h-[560px] sm:min-h-[640px]"
+        className="relative w-full overflow-hidden bg-black select-none min-h-[570px] sm:min-h-[630px]"
         style={{
-          height: `${6 * gridSpacing}px`,
+          height: `${6.18 * gridSpacing}px`,
         }}
       >
         <div className="absolute inset-0 w-full h-full pointer-events-none">
@@ -149,13 +149,13 @@ export function App() {
           />
         </div>
 
-        {/* Tactile Sculpted Claymorphic Container - Exactly 4 rows by 8 columns of white boxes on desktop, responsive card on mobile/tablet */}
+        {/* Tactile Sculpted Claymorphic Container - 4.18 rows height, micro-adjusted downward */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 z-10 pointer-events-auto w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-3rem)] max-w-[1400px] h-[calc(100%-4rem)] sm:h-[calc(100%-6rem)] max-h-[680px]"
+          className="absolute left-1/2 -translate-x-1/2 z-10 pointer-events-auto w-[calc(100vw-1.5rem)] sm:w-[calc(100vw-3rem)] max-w-[1400px] h-[calc(100%-3.5rem)] sm:h-[calc(100%-4.5rem)] max-h-[705px]"
           style={{
             top: `${1 * gridSpacing}px`,
             width: typeof window !== 'undefined' && window.innerWidth >= 8 * gridSpacing ? `${8 * gridSpacing}px` : undefined,
-            height: typeof window !== 'undefined' && window.innerWidth >= 8 * gridSpacing ? `${4 * gridSpacing}px` : undefined,
+            height: typeof window !== 'undefined' && window.innerWidth >= 8 * gridSpacing ? `${4.18 * gridSpacing}px` : undefined,
           }}
         >
           <ClayContainer
