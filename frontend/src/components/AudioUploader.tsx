@@ -36,7 +36,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [language, setLanguage] = useState<string>('id');
+  const [language, setLanguage] = useState<string>('auto');
   const [keywords, setKeywords] = useState<string>('');
   const [template, setTemplate] = useState<MeetingTemplate>('general');
 

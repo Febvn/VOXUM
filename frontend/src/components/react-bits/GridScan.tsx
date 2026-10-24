@@ -55,20 +55,20 @@ interface FloorFlagItem {
 }
 
 const FLOOR_FLAGS: FloorFlagItem[] = [
-  { code: 'fr',   label: 'FR',   nativeName: 'Français',  col: -4 },
-  { code: 'id',   label: 'ID',   nativeName: 'Indonesia', col: -3 },
-  { code: 'en',   label: 'EN',   nativeName: 'English',   col: -2 },
-  { code: 'auto', label: 'AUTO', nativeName: 'Otomatis',  col: -1 },
-  { code: 'de',   label: 'DE',   nativeName: 'Deutsch',   col: 1 },
-  { code: 'ja',   label: 'JA',   nativeName: '日本語',   col: 2 },
-  { code: 'zh',   label: 'ZH',   nativeName: '中文',      col: 3 },
+  { code: 'fr',   label: 'FR',    nativeName: 'Français',     col: -4 },
+  { code: 'id',   label: 'ID',    nativeName: 'Indonesia',    col: -3 },
+  { code: 'en',   label: 'EN',    nativeName: 'English',      col: -2 },
+  { code: 'auto', label: 'MULTI', nativeName: 'Multilingual', col: -1 },
+  { code: 'de',   label: 'DE',    nativeName: 'Deutsch',      col: 1 },
+  { code: 'ja',   label: 'JA',    nativeName: '日本語',      col: 2 },
+  { code: 'zh',   label: 'ZH',    nativeName: '中文',         col: 3 },
 ];
 
 function getFloorFlagItem(col: number): FloorFlagItem | null {
   if (col === -4) return { code: 'fr', label: 'FR', nativeName: 'Français', col: -4 };
   if (col === -3) return { code: 'id', label: 'ID', nativeName: 'Indonesia', col: -3 };
   if (col === -2) return { code: 'en', label: 'EN', nativeName: 'English', col: -2 };
-  if (col === -1 || col === 0) return { code: 'auto', label: 'AUTO', nativeName: 'Otomatis', col: -1 };
+  if (col === -1 || col === 0) return { code: 'auto', label: 'MULTI', nativeName: 'Multilingual', col: -1 };
   if (col === 1) return { code: 'de', label: 'DE', nativeName: 'Deutsch', col: 1 };
   if (col === 2) return { code: 'ja', label: 'JA', nativeName: '日本語', col: 2 };
   if (col === 3) return { code: 'zh', label: 'ZH', nativeName: '中文', col: 3 };
@@ -760,7 +760,7 @@ export const GridScan: React.FC<GridScanProps> = ({
   lightMode = false,
   showFloorFlags = false,
   floorFlagRow = 4.0,
-  selectedLanguage = 'id',
+  selectedLanguage = 'auto',
   onSelectLanguage,
   className,
   style
@@ -1000,8 +1000,8 @@ export const GridScan: React.FC<GridScanProps> = ({
     const flagAtlas = createFlagTextureAtlas();
     flagAtlasRef.current = flagAtlas;
 
-    const selectedItem = FLOOR_FLAGS.find((f) => f.code === selectedLanguage);
-    const initialSelectedCol = selectedItem ? selectedItem.col : -3;
+    const selectedItem = FLOOR_FLAGS.find((f) => f.code === selectedLanguage || (f.code === 'auto' && (selectedLanguage === 'multi' || selectedLanguage === 'auto')));
+    const initialSelectedCol = selectedItem ? selectedItem.col : -1;
 
     const uniforms = {
       iResolution: {
@@ -1251,8 +1251,8 @@ export const GridScan: React.FC<GridScanProps> = ({
 
   useEffect(() => {
     if (!materialRef.current) return;
-    const item = FLOOR_FLAGS.find((f) => f.code === selectedLanguage);
-    const col = item ? item.col : -3;
+    const item = FLOOR_FLAGS.find((f) => f.code === selectedLanguage || (f.code === 'auto' && (selectedLanguage === 'multi' || selectedLanguage === 'auto')));
+    const col = item ? item.col : -1;
     materialRef.current.uniforms.uSelectedFlagCol.value = col;
   }, [selectedLanguage]);
 

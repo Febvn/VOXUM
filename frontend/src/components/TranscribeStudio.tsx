@@ -23,7 +23,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   const [enableWebcamScan, setEnableWebcamScan] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [language, setLanguage] = useState<string>('id');
+  const [language, setLanguage] = useState<string>('auto');
   const [template] = useState<MeetingTemplate>('general');
   const [keywords] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);

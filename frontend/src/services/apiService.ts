@@ -261,7 +261,7 @@ export function generateDemoResponse(template: MeetingTemplate, language: string
     }
   };
 
-  const sampleKey = language === 'auto' ? 'id' : (SAMPLES_BY_LANG[language] ? language : 'en');
+  const sampleKey = (language === 'auto' || language === 'multi') ? 'id' : (SAMPLES_BY_LANG[language] ? language : 'en');
   const d = SAMPLES_BY_LANG[sampleKey] || SAMPLES_BY_LANG.id;
 
   const words: WordTimestamp[] = d.rawText.split(/\s+/).map((word, i) => ({
@@ -316,7 +316,7 @@ export function generateDemoResponse(template: MeetingTemplate, language: string
 export async function processAudioWithGeminiDirect(
   file: File,
   geminiApiKey: string,
-  language: string = 'id',
+  language: string = 'auto',
   template: MeetingTemplate = 'general',
   keywords?: string
 ): Promise<ProcessResponse> {
@@ -332,7 +332,11 @@ export async function processAudioWithGeminiDirect(
   };
 
   const templateGuide = templatePrompts[template] || templatePrompts.general;
-  const langText = language === 'id' ? 'Gunakan Bahasa Indonesia profesional.' : 'Use professional English.';
+  const langText = language === 'id'
+    ? 'Gunakan Bahasa Indonesia profesional.'
+    : (language === 'auto' || language === 'multi')
+      ? 'Deteksi bahasa audio secara otomatis dan transkripsikan sesuai bahasa aslinya.'
+      : `Gunakan bahasa ${language}.`;
   const kwInstruction = keywords ? `Perhatikan istilah/nama khusus berikut: ${keywords}.` : '';
 
   const prompt = `Anda adalah sistem ASR & Sekretaris Eksekutif AI terbaik.

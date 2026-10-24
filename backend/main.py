@@ -37,7 +37,7 @@ llm_service = LLMSummarizerService()
 
 class SummarizeRequest(BaseModel):
     transcript: str
-    language: Optional[str] = "id"
+    language: Optional[str] = "auto"
     api_key: Optional[str] = None
 
 @app.get("/")
@@ -54,7 +54,7 @@ def read_root():
 @app.post("/api/process")
 async def process_audio(
     file: UploadFile = File(...),
-    language: str = Form("id"),
+    language: str = Form("auto"),
     keywords: Optional[str] = Form(None),
     gemini_api_key: Optional[str] = Form(None)
 ):

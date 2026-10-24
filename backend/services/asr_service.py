@@ -50,7 +50,7 @@ class WhistleASRService:
         if self.engine is not None and os.path.exists(self.model_path):
             try:
                 kwargs = {"word_timestamps": word_timestamps}
-                if language and language != "auto":
+                if language and language.lower() not in ["auto", "multi"]:
                     kwargs["language"] = language
                 if keywords:
                     kwargs["keywords"] = keywords
@@ -72,7 +72,7 @@ class WhistleASRService:
 
                 return {
                     "text": res.get("text", ""),
-                    "language": res.get("language", language or "id"),
+                    "language": res.get("language", language or "multi"),
                     "latency_ms": latency_ms,
                     "tokens_per_sec": res.get("tokens_per_sec", 1319),
                     "words": words,
@@ -94,7 +94,7 @@ class WhistleASRService:
                     latency_ms = int((time.time() - start_time) * 1000)
                     return {
                         "text": output,
-                        "language": language or "id",
+                        "language": language or "multi",
                         "latency_ms": latency_ms,
                         "tokens_per_sec": 1250,
                         "words": self._generate_fallback_timestamps(output),
