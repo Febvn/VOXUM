@@ -84,7 +84,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      alert('Tidak dapat mengakses mikrofon audio. Pastikan browser Anda mengizinkan izin audio.');
+      alert('Unable to access audio microphone. Please ensure your browser has microphone permissions enabled.');
     }
   };
 
@@ -277,7 +277,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                   <div className="text-2xl sm:text-3xl font-mono font-bold text-white tracking-widest">
                     {formatTimer(recordingSeconds)}
                   </div>
-                  <p className="text-xs font-mono text-red-400 mt-1 uppercase">SEDANG MEREKAM</p>
+                  <p className="text-xs font-mono text-red-400 mt-1 uppercase">RECORDING IN PROGRESS</p>
                 </div>
 
                 <Magnet padding={12} magnetStrength={2}>
@@ -286,7 +286,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                     className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xs font-semibold flex items-center gap-2 mx-auto border border-slate-700 transition-colors"
                   >
                     <Square className="size-3.5 fill-current" />
-                    <span>HENTIKAN REKAMAN</span>
+                    <span>STOP RECORDING</span>
                   </button>
                 </Magnet>
               </div>
@@ -303,10 +303,10 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
 
                 <div>
                   <p className="text-xs sm:text-sm font-medium text-slate-200">
-                    Rekam Suara Rapat Langsung
+                    Record Live Audio Stream
                   </p>
                   <p className="text-[11px] font-mono text-slate-500 mt-1">
-                    {selectedFile ? `Siap: ${selectedFile.name}` : 'Mikrofon Lokal • Tanpa Retensi Cloud'}
+                    {selectedFile ? `Ready: ${selectedFile.name}` : 'Local Microphone • Zero Cloud Retention'}
                   </p>
                 </div>
               </div>
@@ -326,7 +326,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
               onChange={(e) => setLanguage(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500"
             >
-              <option value="id">Bahasa Indonesia (ID - Fine-Tuned CTC)</option>
+              <option value="id">Indonesian (ID - Fine-Tuned CTC)</option>
               <option value="en">English (EN)</option>
               <option value="de">German (Deutsch)</option>
               <option value="fr">French (Français)</option>

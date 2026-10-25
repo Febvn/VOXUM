@@ -80,7 +80,7 @@ export function App() {
 
       {gpuError && (
         <aside aria-label="WebGPU notice" className="fixed top-24 z-30 px-4 py-2 rounded-lg bg-amber-950/80 border border-amber-700/60 text-amber-200 text-xs font-mono max-w-xl text-center shadow-xl">
-          WebGPU status: {gpuError}. (Pastikan memakai browser yang mendukung WebGPU seperti Chrome atau Edge dengan akselerasi hardware aktif).
+          WebGPU status: {gpuError}. (Ensure you are using a WebGPU-compatible browser such as Chrome or Edge with hardware acceleration enabled).
         </aside>
       )}
 

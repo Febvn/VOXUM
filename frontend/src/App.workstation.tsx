@@ -68,7 +68,7 @@ export function App() {
   const handleSaveApiKey = (key: string) => {
     setApiKey(key);
     localStorage.setItem('gemini_api_key', key);
-    setNotice({ type: 'success', text: 'Gemini API Key tersimpan di LocalStorage browser.' });
+    setNotice({ type: 'success', text: 'Gemini API Key saved in browser LocalStorage.' });
   };
 
   const handleSaveBackendUrl = (url: string) => {
@@ -80,7 +80,7 @@ export function App() {
     setCurrentPlan(plan);
     localStorage.setItem('saas_plan', plan);
     setIsPricingOpen(false);
-    setNotice({ type: 'success', text: `Paket komputasi diperbarui ke lisensi ${plan.toUpperCase()}.` });
+    setNotice({ type: 'success', text: `Compute tier upgraded to ${plan.toUpperCase()} license.` });
   };
 
   const saveMeetingToHistory = (res: ProcessResponse, audioUrl?: string) => {
@@ -106,7 +106,7 @@ export function App() {
   };
 
   const handleClearHistory = () => {
-    if (confirm('Hapus seluruh riwayat rapat yang tersimpan?')) {
+    if (confirm('Delete all saved meeting history?')) {
       setSavedMeetings([]);
       localStorage.removeItem('meeting_history');
     }
@@ -169,7 +169,7 @@ export function App() {
         const directRes = await processAudioWithGeminiDirect(file, apiKey.trim(), language, template, keywords);
         setResult(directRes);
         saveMeetingToHistory(directRes, audioUrl);
-        setNotice({ type: 'success', text: 'Audio diproses via Gemini Multimodal Studio Direct!' });
+        setNotice({ type: 'success', text: 'Audio processed via Gemini Multimodal Studio Direct!' });
         setTimeout(() => {
           document.getElementById('studio-results')?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -331,28 +331,28 @@ export function App() {
             <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6 pointer-events-none pt-24 sm:pt-0">
               <div className="space-y-3 max-w-xl pointer-events-auto">
                 <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed backdrop-blur-md bg-slate-950/70 p-3.5 rounded-2xl border border-slate-800/80 shadow-xl">
-                  Transkripsi rekaman rapat lokal sub-second berbasis Connectionist Temporal Classification (CTC) dan sintesis notula terstruktur dengan timecode kata per kata.
+                  Sub-second local meeting transcription powered by Connectionist Temporal Classification (CTC) with word-level timecode synthesis.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
                   <a
                     href="#studio"
                     className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-1.5"
                   >
-                    <span>BUKA STUDIO</span>
+                    <span>OPEN STUDIO</span>
                     <Disc className="size-3.5" />
                   </a>
                   <a
                     href="#benchmarks"
                     className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 transition-colors flex items-center gap-1.5"
                   >
-                    <span>UJI BENCHMARK</span>
+                    <span>RUN BENCHMARK</span>
                     <Zap className="size-3.5 text-amber-400" />
                   </a>
                   <a
                     href="#specs"
                     className="px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors hidden sm:flex items-center gap-1.5"
                   >
-                    <span>SPESIFIKASI</span>
+                    <span>SPECIFICATIONS</span>
                     <Layers className="size-3.5 text-blue-400" />
                   </a>
                 </div>
@@ -405,7 +405,7 @@ export function App() {
                 {/* Instant 1-Click Test Tracks */}
                 <div className="space-y-2.5">
                   <p className="text-xs font-mono text-slate-400">
-                    Pilih sampel rekaman untuk menguji karaoke sync dan notula instan:
+                    Select sample audio clip to test real-time sync and structured synthesis:
                   </p>
 
                   {/* Benchmark 1 */}
@@ -423,11 +423,11 @@ export function App() {
                             ID • 15.5s
                           </span>
                           <span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors truncate">
-                            Rapat Evaluasi Kuartal Tiga
+                            Q3 Strategy Evaluation Meeting
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-400 font-sans truncate">
-                          Materi promosi Budi, audit server Susi, target traffic Q3.
+                          Marketing deliverables, server latency audits, Q3 growth targets.
                         </p>
                       </div>
                       <div className="size-8 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 group-hover:border-emerald-500/40 shrink-0 transition-colors">
@@ -644,22 +644,22 @@ export function App() {
                       <td className="p-3.5 sm:p-4 text-slate-400">Koneksi Internet Wajib</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 sm:p-4 font-semibold text-white">Alokasi RAM Operasional</td>
+                      <td className="p-3.5 sm:p-4 font-semibold text-white">Operational RAM Footprint</td>
                       <td className="p-3.5 sm:p-4 text-emerald-400 font-bold">~120 MB RAM</td>
                       <td className="p-3.5 sm:p-4 text-slate-400">~4,000 MB RAM</td>
                       <td className="p-3.5 sm:p-4 text-slate-400">Minimal</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 sm:p-4 font-semibold text-white">Pencocokan Kata Khusus</td>
+                      <td className="p-3.5 sm:p-4 font-semibold text-white">Vocabulary Biasing</td>
                       <td className="p-3.5 sm:p-4 text-emerald-400">Aho-Corasick Trie Automaton</td>
-                      <td className="p-3.5 sm:p-4 text-slate-400">Prompt Prefix (Terbatas)</td>
+                      <td className="p-3.5 sm:p-4 text-slate-400">Prompt Prefix (Limited)</td>
                       <td className="p-3.5 sm:p-4 text-slate-400">Custom Vocabulary Tier</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 sm:p-4 font-semibold text-white">Kepatuhan Privasi</td>
+                      <td className="p-3.5 sm:p-4 font-semibold text-white">Privacy Compliance</td>
                       <td className="p-3.5 sm:p-4 text-emerald-400 font-bold">Client RAM / Air-Gapped</td>
-                      <td className="p-3.5 sm:p-4 text-slate-300">Lokal</td>
-                      <td className="p-3.5 sm:p-4 text-slate-400">Audio Dikirim ke Server Luar</td>
+                      <td className="p-3.5 sm:p-4 text-slate-300">Local</td>
+                      <td className="p-3.5 sm:p-4 text-slate-400">Audio Dispatched to Remote Server</td>
                     </tr>
                   </tbody>
                 </table>
@@ -671,10 +671,10 @@ export function App() {
               <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-emerald-400 font-bold">
                   <HardDrive className="size-4" />
-                  <span>Kuantisasi INT8 CTC</span>
+                  <span>INT8 CTC Quantization</span>
                 </div>
                 <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
-                  Bobot matriks dikompresi ke 16.9 MB tanpa kehilangan representasi fonem penting pada audio berisik.
+                  Matrix weights compressed to 16.9 MB without sacrificing critical phoneme representation in noisy audio.
                 </p>
               </div>
 
@@ -684,17 +684,17 @@ export function App() {
                   <span>Aho-Corasick Automaton</span>
                 </div>
                 <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
-                  Pencarian kamus istilah dengan kompleksitas O(n), menaikkan bobot probabilitas kata kunci tim secara deterministik.
+                  O(n) dictionary lookup elevating target team keyword probabilities deterministically.
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
                 <div className="flex items-center gap-2 text-purple-400 font-bold">
                   <Lock className="size-4" />
-                  <span>Memory Buffer Volatil</span>
+                  <span>Volatile Memory Buffer</span>
                 </div>
                 <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
-                  Audio diproses hanya pada RAM aktif dan dihapus seketika setelah decoding selesai, mencegah kebocoran data.
+                  Audio decoded and processed in active RAM only and cleared immediately after inference, preventing data leakage.
                 </p>
               </div>
             </div>

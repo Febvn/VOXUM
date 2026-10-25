@@ -399,7 +399,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('bold')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Tebal (Bold)"
+                    title="Bold (Ctrl+B)"
                   >
                     <Bold className="w-3.5 h-3.5" />
                   </button>
@@ -409,7 +409,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('italic')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Miring (Italic)"
+                    title="Italic (Ctrl+I)"
                   >
                     <Italic className="w-3.5 h-3.5" />
                   </button>
@@ -419,7 +419,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('underline')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Garis Bawah (Underline)"
+                    title="Underline (Ctrl+U)"
                   >
                     <Underline className="w-3.5 h-3.5" />
                   </button>
@@ -431,7 +431,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('formatBlock', '<h1>')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Judul H1"
+                    title="Heading 1"
                   >
                     <Heading1 className="w-3.5 h-3.5" />
                   </button>
@@ -441,7 +441,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('formatBlock', '<h2>')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Subjudul H2"
+                    title="Heading 2"
                   >
                     <Heading2 className="w-3.5 h-3.5" />
                   </button>
@@ -451,7 +451,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('insertUnorderedList')}
                     className="p-1.5 rounded-none border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors active:scale-95"
-                    title="Daftar Poin (List)"
+                    title="Bullet List"
                   >
                     <List className="w-3.5 h-3.5" />
                   </button>
@@ -462,7 +462,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                     type="button"
                     onClick={() => executeCommand('removeFormat')}
                     className="text-[11px] font-mono px-2 py-1 rounded-none border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white transition-colors active:scale-95"
-                    title="Hapus Pemformatan"
+                    title="Clear Formatting"
                   >
                     Reset
                   </button>
@@ -481,9 +481,9 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                           ? 'border-white bg-white text-black font-semibold'
                           : 'border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white'
                       }`}
-                      title="Teks biasa tanpa timestamp"
+                      title="Plain text without timestamps"
                     >
-                      Teks Biasa
+                      Plain Text
                     </button>
                     <button
                       type="button"
@@ -493,7 +493,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                           ? 'border-white bg-white text-black font-semibold'
                           : 'border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white'
                       }`}
-                      title="Format Menit:Detik [00:01]"
+                      title="Minutes:Seconds format [00:01]"
                     >
                       [MM:SS]
                     </button>
@@ -505,9 +505,9 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                           ? 'border-white bg-white text-black font-semibold'
                           : 'border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white'
                       }`}
-                      title="Format Detik [1s, 5s...]"
+                      title="Seconds format [1s, 5s...]"
                     >
-                      [Detik / s]
+                      [Seconds]
                     </button>
                     <button
                       type="button"
@@ -517,14 +517,14 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                           ? 'border-white bg-white text-black font-semibold'
                           : 'border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white'
                       }`}
-                      title="Grup per 1 Menit [00:00 - 01:00]"
+                      title="Group by 1 minute [00:00 - 01:00]"
                     >
-                      [Per Menit]
+                      [Per Minute]
                     </button>
                   </div>
 
                   <div className="ml-auto text-[11px] font-mono text-zinc-500 pr-1 sm:pr-2 flex items-center gap-2">
-                    <span>{wordCount} kata</span>
+                    <span>{wordCount} words</span>
                     <span className="text-zinc-700 hidden sm:inline">•</span>
                     <span className="text-emerald-400 font-sans hidden sm:inline">Editable</span>
                   </div>

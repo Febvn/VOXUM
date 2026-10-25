@@ -56,7 +56,7 @@ interface FloorFlagItem {
 
 const FLOOR_FLAGS: FloorFlagItem[] = [
   { code: 'fr',   label: 'FR',    nativeName: 'Français',     col: -4 },
-  { code: 'id',   label: 'ID',    nativeName: 'Indonesia',    col: -3 },
+  { code: 'id',   label: 'ID',    nativeName: 'Indonesian',   col: -3 },
   { code: 'en',   label: 'EN',    nativeName: 'English',      col: -2 },
   { code: 'auto', label: 'MULTI', nativeName: 'Multilingual', col: -1 },
   { code: 'de',   label: 'DE',    nativeName: 'Deutsch',      col: 1 },
@@ -66,7 +66,7 @@ const FLOOR_FLAGS: FloorFlagItem[] = [
 
 function getFloorFlagItem(col: number): FloorFlagItem | null {
   if (col === -4) return { code: 'fr', label: 'FR', nativeName: 'Français', col: -4 };
-  if (col === -3) return { code: 'id', label: 'ID', nativeName: 'Indonesia', col: -3 };
+  if (col === -3) return { code: 'id', label: 'ID', nativeName: 'Indonesian', col: -3 };
   if (col === -2) return { code: 'en', label: 'EN', nativeName: 'English', col: -2 };
   if (col === -1 || col === 0) return { code: 'auto', label: 'MULTI', nativeName: 'Multilingual', col: -1 };
   if (col === 1) return { code: 'de', label: 'DE', nativeName: 'Deutsch', col: 1 };

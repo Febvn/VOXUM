@@ -167,7 +167,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   return (
     <section
       id={id}
-      aria-label="Studio Transkripsi Audio dan Video"
+      aria-label="Audio and Video Transcription Studio"
       className={`w-full bg-black text-white p-0 m-0 font-['Geist',system-ui,-apple-system,sans-serif] select-none ${className}`}
     >
       {/* KOTAK 1: GRIDSCAN INTERACTIVE MEDIA DROP ZONE & BROWSE (Mentok Full Width Edge-to-Edge) */}
@@ -216,7 +216,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               disabled={isProcessing}
               className="text-[11px] font-mono px-3 py-1.5 rounded-none border border-zinc-800 bg-black/60 backdrop-blur-md text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Coba Audio Contoh ↗
+              Try Sample Audio ↗
             </button>
             <button
               type="button"
@@ -226,7 +226,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
                   ? 'border-emerald-500/80 bg-emerald-950/60 text-emerald-300'
                   : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white'
               }`}
-              title="Aktifkan face tracking via webcam pada 3D Grid"
+              title="Toggle webcam face tracking on 3D grid"
             >
               {enableWebcamScan ? '● Webcam: ON' : '○ Webcam: OFF'}
             </button>
@@ -259,7 +259,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
                   ? 'border-white/50 bg-white/[0.02] shadow-[0_0_50px_rgba(255,255,255,0.2)]'
                   : ''
               } ${isProcessing ? 'cursor-wait' : ''}`}
-              title={isProcessing ? 'Sedang memproses audio...' : 'Klik untuk memilih file atau seret file audio/video ke area ini'}
+              title={isProcessing ? 'Processing audio...' : 'Click to select file or drag audio/video here'}
             >
               {isProcessing ? (
                 <div className="flex flex-col items-center justify-center gap-2.5">

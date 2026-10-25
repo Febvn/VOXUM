@@ -66,7 +66,7 @@ export async function convertMediaToWav(
 ): Promise<ConversionResult> {
   const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name);
 
-  onStatusUpdate?.(isVideo ? 'Mengekstrak audio dari file video MP4...' : 'Membaca data file audio...');
+  onStatusUpdate?.(isVideo ? 'Extracting audio from video file...' : 'Reading audio file data...');
 
   const arrayBuffer = await file.arrayBuffer();
 
@@ -75,18 +75,18 @@ export async function convertMediaToWav(
   const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const audioContext = new AudioContextClass();
 
-  onStatusUpdate?.('Mendekode aliran audio...');
+  onStatusUpdate?.('Decoding audio stream...');
   let decodedBuffer: AudioBuffer;
   try {
     decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
   } catch (err) {
     audioContext.close();
     throw new Error(
-      `Format tidak dapat didekode: ${err instanceof Error ? err.message : String(err)}. Pastikan file media mengandung trek audio valid.`
+      `Failed to decode media format: ${err instanceof Error ? err.message : String(err)}. Ensure the media file contains a valid audio track.`
     );
   }
 
-  onStatusUpdate?.('Mengonversi ke 16kHz Mono PCM WAV...');
+  onStatusUpdate?.('Converting to 16kHz Mono PCM WAV...');
 
   // Mix down multiple channels to Mono
   const numChannels = decodedBuffer.numberOfChannels;
@@ -119,7 +119,7 @@ export async function convertMediaToWav(
   const baseName = file.name.replace(/\.[^/.]+$/, '');
   const wavFile = new File([wavBlob], `${baseName}_converted.wav`, { type: 'audio/wav' });
 
-  onStatusUpdate?.('Konversi berhasil selesai.');
+  onStatusUpdate?.('Conversion completed successfully.');
 
   return {
     wavBlob,

@@ -2,28 +2,28 @@ import type { ProcessResponse, MeetingTemplate, WordTimestamp } from '../types';
 
 export const TEMPLATE_CONFIGS: Record<MeetingTemplate, { label: string; desc: string; icon: string }> = {
   general: {
-    label: 'Rapat Umum',
-    desc: 'Notula formal dengan ringkasan eksekutif, topik bahasan, dan action items.',
+    label: 'General Meeting',
+    desc: 'Formal meeting notes with executive summary, discussion topics, and action items.',
     icon: 'Briefcase'
   },
   agile: {
     label: 'Sprint Standup',
-    desc: 'Fokus pada capaian kemarin, target hari ini, blockers, dan tindak lanjut tim.',
+    desc: 'Focused on yesterday updates, today goals, blockers, and team follow-ups.',
     icon: 'Zap'
   },
   one_on_one: {
     label: '1-on-1 Catchup',
-    desc: 'Evaluasi personal, umpan balik kerja, aspirasi, dan kesepakatan mentoring.',
+    desc: 'Personal check-in, performance feedback, growth goals, and mentoring alignment.',
     icon: 'UserCheck'
   },
   sales: {
     label: 'Sales Call / Client Pitch',
-    desc: 'Identifikasi kebutuhan klien, anggaran, timeline, objection, dan kesepakatan closing.',
+    desc: 'Client requirements, budget, timeline, objections, and closing agreements.',
     icon: 'TrendingUp'
   },
   webinar: {
-    label: 'Kuliah & Webinar',
-    desc: 'Rangkuman materi intisari, terminologi kunci, poin tanya-jawab, dan kesimpulan ilmiah.',
+    label: 'Lecture & Webinar',
+    desc: 'Key topic takeaways, core terminology, Q&A points, and summary takeaways.',
     icon: 'GraduationCap'
   }
 };
@@ -324,48 +324,48 @@ export async function processAudioWithGeminiDirect(
   const mimeType = file.type || 'audio/wav';
 
   const templatePrompts: Record<MeetingTemplate, string> = {
-    general: 'Format notula rapat formal: ringkasan eksekutif, action items, topik bahasan, dan keputusan.',
-    agile: 'Format Agile Sprint: capaian kemarin, target sprint, kendala/blockers, dan PIC tugas.',
-    one_on_one: 'Format 1-on-1 Catchup: evaluasi perkembangan, tantangan, aspirasi, dan rencana tindak lanjut.',
-    sales: 'Format Sales Call: kebutuhan prospek, anggaran, timeline, objection, dan kesepakatan closing.',
-    webinar: 'Format Kuliah/Webinar: konsep kunci, intisari materi, ringkasan Q&A, dan kesimpulan pembelajaran.'
+    general: 'Formal meeting notes format: executive summary, action items, discussion topics, and decisions.',
+    agile: 'Agile Sprint format: yesterday updates, sprint goals, blockers, and task owners.',
+    one_on_one: '1-on-1 Catchup format: progress evaluation, challenges, goals, and follow-up plan.',
+    sales: 'Sales Call format: prospect needs, budget, timeline, objections, and closing agreement.',
+    webinar: 'Lecture/Webinar format: key concepts, core summary, Q&A synthesis, and takeaways.'
   };
 
   const templateGuide = templatePrompts[template] || templatePrompts.general;
   const langText = language === 'id'
-    ? 'Gunakan Bahasa Indonesia profesional.'
+    ? 'Use professional Indonesian.'
     : (language === 'auto' || language === 'multi')
-      ? 'Deteksi bahasa audio secara otomatis dan transkripsikan sesuai bahasa aslinya.'
-      : `Gunakan bahasa ${language}.`;
-  const kwInstruction = keywords ? `Perhatikan istilah/nama khusus berikut: ${keywords}.` : '';
+      ? 'Automatically detect the audio language and transcribe in its original language.'
+      : `Use language ${language}.`;
+  const kwInstruction = keywords ? `Pay special attention to these terms/names: ${keywords}.` : '';
 
-  const prompt = `Anda adalah sistem ASR & Sekretaris Eksekutif AI terbaik.
-1. Transkripsikan audio terlampir secara akurat kata demi kata.
-2. Analisis isi rekaman audio tersebut dan buatkan notula terstruktur.
+  const prompt = `You are a premier ASR and executive synthesis AI engine.
+1. Transcribe the attached audio accurately word-by-word.
+2. Analyze the audio content and generate structured meeting notes.
 ${langText}
 ${kwInstruction}
 Template: ${templateGuide}
 
-Keluarkan HANYA JSON valid tanpa teks atau markdown lain dengan format berikut:
+Output ONLY valid JSON without markdown wrapping or commentary:
 {
   "transcription": {
-    "text": "Transkrip lengkap audio",
+    "text": "Full audio transcript",
     "language": "${language}",
     "words": [
-      { "word": "kata1", "start": 0.0, "end": 0.3, "probability": 0.98 }
+      { "word": "word1", "start": 0.0, "end": 0.3, "probability": 0.98 }
     ]
   },
   "meeting_notes": {
-    "title": "Judul Rapat Spesifik",
-    "executive_summary": "Ringkasan eksekutif 2-3 paragraf.",
+    "title": "Specific Meeting Title",
+    "executive_summary": "Executive summary in 2-3 paragraphs.",
     "key_topics": [
-      { "title": "Nama Topik", "summary": "Ringkasan topik" }
+      { "title": "Topic Name", "summary": "Topic summary" }
     ],
     "action_items": [
-      { "task": "Nama tugas", "assignee": "Nama orang atau Tim", "deadline": "Batas waktu", "priority": "High" | "Medium" | "Low" }
+      { "task": "Task description", "assignee": "Person or Team name", "deadline": "Deadline", "priority": "High" | "Medium" | "Low" }
     ],
-    "decisions": ["Keputusan rapat"],
-    "sentiment": "Sangat Produktif" | "Produktif" | "Perlu Tindak Lanjut"
+    "decisions": ["Meeting decisions"],
+    "sentiment": "Highly Productive" | "Productive" | "Needs Follow-up"
   }
 }`;
 
@@ -402,7 +402,7 @@ Keluarkan HANYA JSON valid tanpa teks atau markdown lain dengan format berikut:
   const data = await res.json();
   const rawJson = data.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!rawJson) {
-    throw new Error('Tidak ada output JSON yang diterima dari Gemini API.');
+    throw new Error('No JSON output received from Gemini API.');
   }
 
   const parsed = JSON.parse(rawJson);

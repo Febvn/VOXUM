@@ -102,7 +102,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>WHISTLE COMPACT RUNTIME (16.9 MB)</span>
             </div>
             <p className="font-sans">
-              Menjalankan model CAct offline terkompresi pada port 8000 untuk privasi udara penuh (air-gapped environments).
+              Runs the compressed offline ASR model on port 8000 for complete air-gapped privacy environments.
             </p>
           </div>
         </div>

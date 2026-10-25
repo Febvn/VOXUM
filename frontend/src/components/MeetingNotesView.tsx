@@ -39,8 +39,8 @@ export const MeetingNotesView: React.FC<MeetingNotesViewProps> = ({ notes, rawTr
     if (!newTaskText.trim()) return;
     const newItem: ActionItem = {
       task: newTaskText.trim(),
-      assignee: newTaskAssignee.trim() || 'Tim',
-      deadline: 'Segera',
+      assignee: newTaskAssignee.trim() || 'Team',
+      deadline: 'ASAP',
       priority: 'Medium',
       completed: false
     };
@@ -63,22 +63,22 @@ export const MeetingNotesView: React.FC<MeetingNotesViewProps> = ({ notes, rawTr
 
   const downloadMarkdown = () => {
     const md = `# ${notes.title}
-*Sentimen: ${notes.sentiment}*
+*Sentiment: ${notes.sentiment}*
 
-## Ringkasan Eksekutif
+## Executive Summary
 ${notes.executive_summary}
 
-## Topik Utama Pembahasan
+## Key Discussion Topics
 ${notes.key_topics.map((t) => `### ${t.title}\n${t.summary}`).join('\n\n')}
 
-## Action Items & Tindak Lanjut
-${actionItems.map((a) => `- [${a.completed ? 'x' : ' '}] **${a.task}** (PIC: ${a.assignee} | Deadline: ${a.deadline} | Prioritas: ${a.priority})`).join('\n')}
+## Action Items & Next Steps
+${actionItems.map((a) => `- [${a.completed ? 'x' : ' '}] **${a.task}** (Owner: ${a.assignee} | Due: ${a.deadline} | Priority: ${a.priority})`).join('\n')}
 
-## Keputusan Penting
+## Key Decisions
 ${notes.decisions.map((d) => `- ${d}`).join('\n')}
 
 ---
-### Transkrip Lengkap
+### Full Transcript
 ${rawTranscript}
 `;
 
@@ -86,24 +86,24 @@ ${rawTranscript}
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `notula_${Date.now()}.md`;
+    link.download = `meeting_notes_${Date.now()}.md`;
     link.click();
   };
 
   const copyForPlatform = (platform: 'notion' | 'slack' | 'whatsapp') => {
     let text = '';
     if (platform === 'notion') {
-      text = `[NOTULA] ${notes.title}\n\nRINGKASAN:\n${notes.executive_summary}\n\nACTION ITEMS:\n${actionItems
+      text = `[MEETING NOTES] ${notes.title}\n\nSUMMARY:\n${notes.executive_summary}\n\nACTION ITEMS:\n${actionItems
         .map((a) => `- [${a.completed ? 'x' : ' '}] ${a.task} (@${a.assignee} - ${a.deadline})`)
-        .join('\n')}\n\nKEPUTUSAN:\n${notes.decisions.map((d) => `- ${d}`).join('\n')}`;
+        .join('\n')}\n\nDECISIONS:\n${notes.decisions.map((d) => `- ${d}`).join('\n')}`;
     } else if (platform === 'slack') {
-      text = `*[NOTULA] ${notes.title}*\n\n*Ringkasan:*\n>${notes.executive_summary}\n\n*Action Items:*\n${actionItems
-        .map((a) => `• ${a.completed ? '~' : ''}${a.task}${a.completed ? '~' : ''} _(PIC: ${a.assignee}, Due: ${a.deadline})_`)
-        .join('\n')}\n\n*Keputusan:*\n${notes.decisions.map((d) => `• ${d}`).join('\n')}`;
+      text = `*[MEETING NOTES] ${notes.title}*\n\n*Summary:*\n>${notes.executive_summary}\n\n*Action Items:*\n${actionItems
+        .map((a) => `• ${a.completed ? '~' : ''}${a.task}${a.completed ? '~' : ''} _(Owner: ${a.assignee}, Due: ${a.deadline})_`)
+        .join('\n')}\n\n*Decisions:*\n${notes.decisions.map((d) => `• ${d}`).join('\n')}`;
     } else {
-      text = `*[NOTULA] ${notes.title}*\n\n*RINGKASAN:*\n${notes.executive_summary}\n\n*ACTION ITEMS:\n${actionItems
+      text = `*[MEETING NOTES] ${notes.title}*\n\n*SUMMARY:*\n${notes.executive_summary}\n\n*ACTION ITEMS:\n${actionItems
         .map((a) => `- *${a.task}* (${a.assignee} - ${a.deadline})`)
-        .join('\n')}\n\n*KEPUTUSAN:\n${notes.decisions.map((d) => `- ${d}`).join('\n')}`;
+        .join('\n')}\n\n*DECISIONS:\n${notes.decisions.map((d) => `- ${d}`).join('\n')}`;
     }
 
     navigator.clipboard.writeText(text);
@@ -137,7 +137,7 @@ ${rawTranscript}
             <button
               onClick={() => copyForPlatform('whatsapp')}
               className="text-[10px] sm:text-[11px] px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors flex items-center justify-center gap-1"
-              title="Salin format WhatsApp"
+              title="Copy for WhatsApp"
             >
               {copiedFormat === 'whatsapp' ? (
                 <>
@@ -151,7 +151,7 @@ ${rawTranscript}
             <button
               onClick={() => copyForPlatform('slack')}
               className="text-[10px] sm:text-[11px] px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors flex items-center justify-center gap-1"
-              title="Salin format Slack"
+              title="Copy for Slack"
             >
               {copiedFormat === 'slack' ? (
                 <>
@@ -165,7 +165,7 @@ ${rawTranscript}
             <button
               onClick={() => copyForPlatform('notion')}
               className="text-[10px] sm:text-[11px] px-2 py-1.5 rounded-lg hover:bg-slate-800 text-slate-300 transition-colors flex items-center justify-center gap-1"
-              title="Salin format Notion"
+              title="Copy for Notion"
             >
               {copiedFormat === 'notion' ? (
                 <>
@@ -182,7 +182,7 @@ ${rawTranscript}
             <button
               onClick={handlePrintPDF}
               className="flex-1 sm:flex-none text-[11px] sm:text-xs flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors font-medium"
-              title="Cetak atau Simpan PDF"
+              title="Print or Save PDF"
             >
               <Printer className="size-3.5" />
               <span>PDF</span>
@@ -281,7 +281,7 @@ ${rawTranscript}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 print:hidden font-mono">
               <input
                 type="text"
-                placeholder="Deskripsi tugas baru..."
+                placeholder="New task description..."
                 value={newTaskText}
                 onChange={(e) => setNewTaskText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
@@ -290,7 +290,7 @@ ${rawTranscript}
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  placeholder="PIC (e.g. Budi)"
+                  placeholder="Owner (e.g. Alex)"
                   value={newTaskAssignee}
                   onChange={(e) => setNewTaskAssignee(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addTask()}
@@ -338,11 +338,11 @@ ${rawTranscript}
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] font-mono text-slate-400 pt-0.5">
                             <span className="flex items-center gap-1">
                               <User className="size-3 text-emerald-400 shrink-0" />
-                              <span className="truncate max-w-[100px]">{item.assignee || 'Tim'}</span>
+                              <span className="truncate max-w-[100px]">{item.assignee || 'Team'}</span>
                             </span>
                             <span className="flex items-center gap-1">
                               <Calendar className="size-3 text-blue-400 shrink-0" />
-                              <span>{item.deadline || 'Segera'}</span>
+                              <span>{item.deadline || 'ASAP'}</span>
                             </span>
                             <span
                               className={`px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase ${
@@ -362,7 +362,7 @@ ${rawTranscript}
                       <button
                         onClick={() => deleteTask(idx)}
                         className="p-1 text-slate-500 hover:text-red-400 transition-colors print:hidden shrink-0"
-                        title="Hapus tugas"
+                        title="Delete task"
                       >
                         <Trash2 className="size-3.5" />
                       </button>
@@ -370,7 +370,7 @@ ${rawTranscript}
                   );
                 })
               ) : (
-                <p className="text-xs font-mono text-slate-500">Tidak ada action items terdaftar.</p>
+                <p className="text-xs font-mono text-slate-500">No action items recorded.</p>
               )}
             </div>
           </div>
@@ -390,7 +390,7 @@ ${rawTranscript}
                 </SpotlightCard>
               ))
             ) : (
-              <p className="text-xs font-mono text-slate-500">Tidak ada topik terpisah.</p>
+              <p className="text-xs font-mono text-slate-500">No distinct topics recorded.</p>
             )}
           </div>
         )}
@@ -398,7 +398,7 @@ ${rawTranscript}
         {activeTab === 'decisions' && (
           <div className="space-y-2.5 sm:space-y-3">
             <h4 className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 mb-2">
-              LOG KESEPAKATAN &amp; KEPUTUSAN FINAL
+              LOG OF AGREEMENTS &amp; FINAL DECISIONS
             </h4>
             {notes.decisions && notes.decisions.length > 0 ? (
               notes.decisions.map((d, idx) => (
@@ -414,7 +414,7 @@ ${rawTranscript}
                 </SpotlightCard>
               ))
             ) : (
-              <p className="text-xs font-mono text-slate-500">Tidak ada kesepakatan formal tercatat.</p>
+              <p className="text-xs font-mono text-slate-500">No formal agreements recorded.</p>
             )}
           </div>
         )}
