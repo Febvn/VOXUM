@@ -76,11 +76,16 @@ export function App() {
     localStorage.setItem('backend_url', url);
   };
 
-  const handleUpgradePlan = (plan: 'pro' | 'enterprise') => {
+  const handleUpgradePlan = (plan: 'free' | 'pro' | 'enterprise') => {
     setCurrentPlan(plan);
     localStorage.setItem('saas_plan', plan);
     setIsPricingOpen(false);
-    setNotice({ type: 'success', text: `Compute tier upgraded to ${plan.toUpperCase()} license.` });
+    setNotice({
+      type: 'success',
+      text: plan === 'free'
+        ? 'Compute tier switched to FREE tier.'
+        : `Compute tier upgraded to ${plan.toUpperCase()} license (100% Free Access).`
+    });
   };
 
   const saveMeetingToHistory = (res: ProcessResponse, audioUrl?: string) => {

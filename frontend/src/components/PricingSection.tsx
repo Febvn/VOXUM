@@ -4,16 +4,16 @@ import { ShinyText } from './react-bits';
 
 export interface PricingSectionProps {
   onSelectPlan?: (plan: string) => void;
+  currentPlan?: 'free' | 'pro' | 'enterprise';
   className?: string;
 }
 
 export const PricingSection: React.FC<PricingSectionProps> = ({
   onSelectPlan,
+  currentPlan = 'free',
   className = ''
 }) => {
   const [billing, setBilling] = useState<'monthly' | 'annually'>('monthly');
-
-  const studioPrice = billing === 'annually' ? 24 : 29;
 
   return (
     <section
@@ -33,7 +33,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
           />
         </h2>
         <p className="text-xs sm:text-sm text-zinc-400">
-          Predictable speech processing tiers, local runtime licenses, and air-gapped enterprise options.
+          All high-speed speech processing, local runtime models, and enterprise tiers are currently unlocked for free.
         </p>
       </div>
 
@@ -45,10 +45,19 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
           <div className="p-6 sm:p-8 flex flex-col justify-between bg-black">
             <div>
               <div className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase mb-6">
-                BILLING FREQUENCY
+                TIER SELECTION
               </div>
 
               <div className="space-y-4">
+                <div className="p-3 border border-zinc-800 bg-zinc-950 font-mono text-xs space-y-1.5">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-none bg-white text-black font-bold uppercase inline-block">
+                    100% FREE ACCESS
+                  </span>
+                  <p className="text-[11px] text-zinc-300 font-sans leading-relaxed">
+                    Pro and Enterprise licenses are completely free during this release. Select any plan to activate instantly.
+                  </p>
+                </div>
+
                 {/* Annually Radio */}
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
@@ -72,7 +81,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                   </div>
                   <span className="text-sm font-medium text-zinc-200">Annually</span>
                   <span className="text-[10px] font-semibold text-zinc-300 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-none uppercase">
-                    Save 20%
+                    Free
                   </span>
                 </label>
 
@@ -98,12 +107,15 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                     )}
                   </div>
                   <span className="text-sm font-medium text-zinc-200">Monthly</span>
+                  <span className="text-[10px] font-semibold text-zinc-300 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-none uppercase">
+                    Free
+                  </span>
                 </label>
               </div>
             </div>
 
             <div className="pt-8 text-[11px] text-zinc-500 font-mono">
-              Prices in USD. Taxes may apply.
+              Zero credit card or payment required.
             </div>
           </div>
 
@@ -142,22 +154,32 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </ul>
             </div>
 
-            <button
-              onClick={() => onSelectPlan?.('hobby')}
-              type="button"
-              className="w-full py-3 rounded-none border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-white font-semibold text-xs tracking-wider uppercase transition-colors"
-            >
-              START FREE
-            </button>
+            {currentPlan === 'free' ? (
+              <button
+                disabled
+                type="button"
+                className="w-full py-3 rounded-none border border-zinc-800 bg-zinc-950 text-zinc-500 font-semibold text-xs tracking-wider uppercase cursor-default"
+              >
+                CURRENT ACTIVE PLAN
+              </button>
+            ) : (
+              <button
+                onClick={() => onSelectPlan?.('free')}
+                type="button"
+                className="w-full py-3 rounded-none border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-white font-semibold text-xs tracking-wider uppercase transition-colors"
+              >
+                SELECT FREE
+              </button>
+            )}
           </div>
 
-          {/* Column 3: Studio Plan (Popular) */}
+          {/* Column 3: Studio / Pro Plan (Free Preview) */}
           <div className="p-6 sm:p-8 flex flex-col justify-between bg-black relative">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-bold text-white tracking-tight uppercase">Studio</h3>
+                <h3 className="text-xl font-bold text-white tracking-tight uppercase">Studio Pro</h3>
                 <span className="bg-white text-zinc-950 font-bold text-[10px] px-2 py-0.5 rounded-none uppercase">
-                  Popular
+                  FREE PREVIEW
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-1 min-h-[32px]">
@@ -167,9 +189,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               {/* Price */}
               <div className="mt-5 mb-7 flex items-baseline gap-2">
                 <span className="text-3xl sm:text-4xl font-bold text-white">
-                  ${studioPrice}
+                  $0
                 </span>
-                <span className="text-xs text-zinc-400 font-mono">per seat / month</span>
+                <span className="text-xs text-zinc-400 font-mono">free during preview (reg. $29)</span>
               </div>
 
               {/* Feature list */}
@@ -201,26 +223,42 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </ul>
             </div>
 
-            <button
-              onClick={() => onSelectPlan?.('studio')}
-              type="button"
-              className="w-full py-3 rounded-none bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs tracking-wider uppercase transition-colors shadow-sm"
-            >
-              START 14-DAY TRIAL
-            </button>
+            {currentPlan === 'pro' ? (
+              <button
+                disabled
+                type="button"
+                className="w-full py-3 rounded-none border border-white bg-white text-zinc-950 font-bold text-xs tracking-wider uppercase cursor-default"
+              >
+                CURRENT ACTIVE PLAN
+              </button>
+            ) : (
+              <button
+                onClick={() => onSelectPlan?.('pro')}
+                type="button"
+                className="w-full py-3 rounded-none bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs tracking-wider uppercase transition-colors shadow-sm"
+              >
+                ACTIVATE PRO (FREE)
+              </button>
+            )}
           </div>
 
-          {/* Column 4: Business Plan */}
+          {/* Column 4: Enterprise Plan (Free Access) */}
           <div className="p-6 sm:p-8 flex flex-col justify-between bg-black">
             <div>
-              <h3 className="text-xl font-bold text-white tracking-tight uppercase">Business</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-bold text-white tracking-tight uppercase">Enterprise</h3>
+                <span className="bg-zinc-800 text-zinc-200 border border-zinc-700 font-bold text-[10px] px-2 py-0.5 rounded-none uppercase">
+                  UNLOCKED
+                </span>
+              </div>
               <p className="text-xs text-zinc-400 mt-1 min-h-[32px]">
-                Air-gapped deployment, custom models, and SLA
+                Air-gapped deployment, custom models, and full team access
               </p>
 
               {/* Price */}
               <div className="mt-5 mb-7 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-bold text-white">Let's talk</span>
+                <span className="text-3xl sm:text-4xl font-bold text-white">$0</span>
+                <span className="text-xs text-zinc-400 font-mono">unlocked for community</span>
               </div>
 
               {/* Feature list */}
@@ -252,13 +290,23 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </ul>
             </div>
 
-            <button
-              onClick={() => onSelectPlan?.('business')}
-              type="button"
-              className="w-full py-3 rounded-none border border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-white font-semibold text-xs tracking-wider uppercase transition-colors"
-            >
-              CONTACT SALES
-            </button>
+            {currentPlan === 'enterprise' ? (
+              <button
+                disabled
+                type="button"
+                className="w-full py-3 rounded-none border border-white bg-white text-zinc-950 font-bold text-xs tracking-wider uppercase cursor-default"
+              >
+                CURRENT ACTIVE PLAN
+              </button>
+            ) : (
+              <button
+                onClick={() => onSelectPlan?.('enterprise')}
+                type="button"
+                className="w-full py-3 rounded-none border border-zinc-500 hover:border-white bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs tracking-wider uppercase transition-colors"
+              >
+                ACTIVATE ENTERPRISE (FREE)
+              </button>
+            )}
           </div>
         </div>
 

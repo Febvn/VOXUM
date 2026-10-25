@@ -6,12 +6,13 @@ interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentPlan?: 'free' | 'pro' | 'enterprise';
-  onUpgrade?: (plan: 'pro' | 'enterprise') => void;
+  onUpgrade?: (plan: 'free' | 'pro' | 'enterprise') => void;
 }
 
 export const PricingModal: React.FC<PricingModalProps> = ({
   isOpen,
   onClose,
+  currentPlan = 'free',
   onUpgrade,
 }) => {
   if (!isOpen) return null;
@@ -28,9 +29,14 @@ export const PricingModal: React.FC<PricingModalProps> = ({
         </button>
 
         <PricingSection
+          currentPlan={currentPlan}
           onSelectPlan={(plan) => {
-            if (plan === 'pro' || plan === 'enterprise') {
-              onUpgrade?.(plan);
+            if (plan === 'pro' || plan === 'studio') {
+              onUpgrade?.('pro');
+            } else if (plan === 'enterprise' || plan === 'business') {
+              onUpgrade?.('enterprise');
+            } else {
+              onUpgrade?.('free');
             }
             onClose();
           }}
