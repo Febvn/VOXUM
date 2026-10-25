@@ -27,33 +27,41 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   const [template] = useState<MeetingTemplate>('general');
   const [keywords] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState<string>('');
+  const [progress, setProgress] = useState<number>(0);
 
   const handleFileSelect = async (file: File) => {
     if (isProcessing) return;
     setIsProcessing(true);
-    setProcessingStep('Menganalisis & mendekode audio...');
+    setProgress(5);
+
+    let progressInterval: any = setInterval(() => {
+      setProgress((prev) => {
+        if (prev < 30) return prev + 3;
+        if (prev < 65) return prev + 2;
+        if (prev < 92) return Number((prev + 0.6).toFixed(1));
+        return prev;
+      });
+    }, 180);
 
     try {
       let fileToUpload: File = file;
       let targetFileName = file.name;
 
       try {
-        const conv = await convertMediaToWav(file, (msg) => setProcessingStep(msg));
+        const conv = await convertMediaToWav(file);
         fileToUpload = conv.wavFile;
         targetFileName = conv.originalName || file.name;
+        setProgress((prev) => Math.max(prev, 35));
       } catch (convErr) {
         console.warn('Conversion error, fallback to direct upload:', convErr);
       }
 
-      setProcessingStep('Mengirim stream ke engine Whistle ASR...');
+      setProgress((prev) => Math.max(prev, 50));
 
       const formData = new FormData();
       formData.append('file', fileToUpload);
       formData.append('language', language);
       if (keywords) formData.append('keywords', keywords);
-
-      setProcessingStep('Menjalankan transkripsi ultra-cepat & ekstraksi notula...');
 
       const configuredBackendUrl =
         (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) ||
@@ -79,6 +87,10 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
         textOutput = fallback.transcription.text;
       }
 
+      clearInterval(progressInterval);
+      setProgress(100);
+      await new Promise((r) => setTimeout(r, 250));
+
       onTranscriptionComplete?.(textOutput, targetFileName);
 
       const el = document.getElementById('studio-grid-continuation');
@@ -88,8 +100,9 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
     } catch (err) {
       console.error('Transcription error:', err);
     } finally {
+      clearInterval(progressInterval);
       setIsProcessing(false);
-      setProcessingStep('');
+      setProgress(0);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -120,13 +133,19 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       await handleFileSelect(file);
     } catch {
       setIsProcessing(true);
-      setProcessingStep('Menyiapkan file audio contoh...');
+      setProgress(10);
+      const interval = setInterval(() => {
+        setProgress((prev) => (prev < 90 ? prev + 8 : prev));
+      }, 70);
       await new Promise((r) => setTimeout(r, 600));
+      clearInterval(interval);
+      setProgress(100);
+      await new Promise((r) => setTimeout(r, 200));
 
       const sample = generateDemoResponse(template, language);
       onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav');
       setIsProcessing(false);
-      setProcessingStep('');
+      setProgress(0);
 
       const el = document.getElementById('studio-grid-continuation');
       if (el) {
@@ -233,12 +252,12 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               title={isProcessing ? 'Sedang memproses audio...' : 'Klik untuk memilih file atau seret file audio/video ke area ini'}
             >
               {isProcessing ? (
-                <>
-                  <RefreshCw className="w-10 h-10 sm:w-12 sm:h-12 text-white animate-spin stroke-[1.3] drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
-                  <span className="text-xs sm:text-sm font-mono tracking-widest text-zinc-300 uppercase font-medium text-center px-4">
-                    {processingStep || 'MEMPROSES AUDIO...'}
+                <div className="flex flex-col items-center justify-center gap-2.5">
+                  <RefreshCw className="w-10 h-10 sm:w-11 sm:h-11 text-white animate-spin stroke-[1.3] drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
+                  <span className="text-sm sm:text-base font-mono tracking-wider text-white font-semibold tabular-nums">
+                    {Math.min(100, Math.max(0, Math.round(progress)))}%
                   </span>
-                </>
+                </div>
               ) : (
                 <>
                   <CloudUpload
