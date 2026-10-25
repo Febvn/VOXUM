@@ -37,7 +37,7 @@ export const MeetingHistoryDrawer: React.FC<MeetingHistoryDrawerProps> = ({
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="size-8 sm:size-9 rounded-xl bg-slate-950 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="size-8 sm:size-9 rounded-none bg-slate-950 border border-white/20 flex items-center justify-center text-white">
               <Clock className="size-4" />
             </div>
             <div>
@@ -49,7 +49,7 @@ export const MeetingHistoryDrawer: React.FC<MeetingHistoryDrawerProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-none text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="size-5" />
           </button>
@@ -64,13 +64,13 @@ export const MeetingHistoryDrawer: React.FC<MeetingHistoryDrawerProps> = ({
               placeholder="Search sessions or transcripts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-none text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-white font-mono"
             />
           </div>
           {savedMeetings.length > 0 && (
             <button
               onClick={onClearAll}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors text-xs flex items-center gap-1"
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-none transition-colors text-xs flex items-center gap-1"
               title="Purge session archive"
             >
               <Trash2 className="size-3.5" />
@@ -84,15 +84,15 @@ export const MeetingHistoryDrawer: React.FC<MeetingHistoryDrawerProps> = ({
             filtered.map((item) => (
               <SpotlightCard
                 key={item.id}
-                spotlightColor="rgba(16, 185, 129, 0.15)"
-                className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-emerald-500/40 transition-all group space-y-2 cursor-pointer"
+                spotlightColor="rgba(255, 255, 255, 0.08)"
+                className="p-3.5 rounded-none bg-slate-950/70 border border-slate-800/80 hover:border-white/40 transition-all group space-y-2 cursor-pointer"
                 onClick={() => {
                   onSelectMeeting(item);
                   onClose();
                 }}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-xs font-semibold text-white group-hover:text-emerald-400 transition-colors line-clamp-1 font-mono">
+                  <h4 className="text-xs font-semibold text-white group-hover:text-zinc-200 transition-colors line-clamp-1 font-mono">
                     {item.meeting_notes.title}
                   </h4>
                   <button
@@ -114,13 +114,13 @@ export const MeetingHistoryDrawer: React.FC<MeetingHistoryDrawerProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       <Calendar className="size-2.5" />
-                      <span>{new Date(item.createdAt).toLocaleDateString('id-ID')}</span>
+                      <span>{new Date(item.createdAt).toLocaleDateString('en-US')}</span>
                     </span>
-                    <span className="uppercase px-1.5 py-0.2 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                    <span className="uppercase px-1.5 py-0.2 rounded-none bg-slate-900 border border-slate-800 text-slate-400">
                       {item.transcription.language}
                     </span>
                   </div>
-                  <span className="text-emerald-400 flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform font-bold">
+                  <span className="text-white flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform font-bold">
                     <span>LOAD</span>
                     <ArrowRight className="size-2.5" />
                   </span>

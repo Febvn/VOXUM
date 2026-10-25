@@ -131,7 +131,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
           {/* Play/Pause Button */}
           <button
             onClick={togglePlay}
-            className="size-10 sm:size-11 rounded-full bg-emerald-500 hover:bg-emerald-400 flex items-center justify-center text-slate-950 shadow-md shadow-emerald-500/20 transition-transform active:scale-95 shrink-0"
+            className="size-10 sm:size-11 rounded-none bg-white hover:bg-zinc-200 flex items-center justify-center text-black shadow-md transition-transform active:scale-95 shrink-0"
           >
             {isPlaying ? <Pause className="size-4 sm:size-5 fill-current" /> : <Play className="size-4 sm:size-5 fill-current ml-0.5" />}
           </button>
@@ -141,8 +141,8 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
             {[40, 70, 30, 90, 60, 80, 45, 95].map((h, i) => (
               <div
                 key={i}
-                className={`w-1 rounded-full transition-all duration-150 ${
-                  isPlaying ? 'bg-emerald-400 animate-pulse' : 'bg-slate-700'
+                className={`w-1 rounded-none transition-all duration-150 ${
+                  isPlaying ? 'bg-white' : 'bg-slate-700'
                 }`}
                 style={{
                   height: isPlaying ? `${Math.max(20, (h * (i % 2 === 0 ? 1 : 0.7)))}%` : '20%',
@@ -162,7 +162,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
               step={0.1}
               value={currentTime}
               onChange={(e) => seekTo(parseFloat(e.target.value))}
-              className="flex-1 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 min-w-0"
+              className="flex-1 h-1.5 bg-slate-800 rounded-none appearance-none cursor-pointer accent-white min-w-0"
             />
             <span className="text-[11px] sm:text-xs font-mono text-slate-400 shrink-0">
               {formatSecs(duration || (words.length ? words[words.length - 1].end : 0))}
@@ -184,7 +184,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
               step={0.05}
               value={isMuted ? 0 : volume}
               onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="w-14 sm:w-20 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              className="w-14 sm:w-20 h-1 bg-slate-800 rounded-none appearance-none cursor-pointer accent-white"
             />
           </div>
 
@@ -192,7 +192,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
             {/* Speed Toggle */}
             <button
               onClick={changeSpeed}
-              className="text-[11px] sm:text-xs font-mono font-semibold px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+              className="text-[11px] sm:text-xs font-mono font-semibold px-2 py-1 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
             >
               {playbackRate}x
             </button>
@@ -200,9 +200,9 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
             {/* Copy Button */}
             <button
               onClick={copyTranscript}
-              className="text-[11px] sm:text-xs flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors font-mono"
+              className="text-[11px] sm:text-xs flex items-center gap-1 px-2.5 py-1 rounded-none bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors font-mono"
             >
-              {copied ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+              {copied ? <Check className="size-3 text-white" /> : <Copy className="size-3" />}
               <span>{copied ? 'COPIED' : 'COPY'}</span>
             </button>
           </div>
@@ -213,7 +213,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-3 gap-2 font-mono">
         <div>
           <h3 className="text-xs font-bold text-white flex items-center gap-1.5 uppercase">
-            <Activity className="size-3.5 sm:size-4 text-emerald-400 shrink-0" />
+            <Activity className="size-3.5 sm:size-4 text-white shrink-0" />
             <DecryptedText text="KARAOKE TIMECODE SYNC" speed={25} animateOn="view" className="text-white font-mono text-xs" />
           </h3>
           <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Tap any word token to scrub playback position</p>
@@ -225,7 +225,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
             placeholder="Search audio token..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 w-full font-mono"
+            className="pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-none text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-white w-full font-mono"
           />
         </div>
       </div>
@@ -233,7 +233,7 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
       {/* Word-Synchronized Stream with auto-scroll container */}
       <div
         ref={containerRef}
-        className="max-h-56 sm:max-h-72 overflow-y-auto p-3 sm:p-4 bg-slate-950/60 rounded-xl border border-slate-800/80 leading-relaxed text-xs sm:text-sm select-text scroll-smooth"
+        className="max-h-56 sm:max-h-72 overflow-y-auto p-3 sm:p-4 bg-slate-950/60 rounded-none border border-slate-800/80 leading-relaxed text-xs sm:text-sm select-text scroll-smooth"
       >
         {words && words.length > 0 ? (
           <div className="flex flex-wrap gap-x-1 sm:gap-x-1.5 gap-y-1.5 sm:gap-y-2">
@@ -246,9 +246,9 @@ export const AudioPlayerWithSync: React.FC<AudioPlayerWithSyncProps> = ({ audioU
                   key={idx}
                   ref={isCurrent ? activeWordRef : null}
                   onClick={() => seekTo(w.start)}
-                  className={`cursor-pointer px-1 py-0.5 rounded transition-all ${
+                  className={`cursor-pointer px-1 py-0.5 rounded-none transition-all ${
                     isCurrent
-                      ? 'bg-emerald-500 text-slate-950 font-bold scale-105 shadow-sm shadow-emerald-500/40'
+                      ? 'bg-white text-black font-bold scale-105 shadow-sm shadow-white/20'
                       : matchesSearch
                       ? 'bg-amber-400/20 text-amber-300 font-semibold'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800'

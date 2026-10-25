@@ -223,7 +223,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               onClick={() => setEnableWebcamScan((prev) => !prev)}
               className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors ${
                 enableWebcamScan
-                  ? 'border-emerald-500/80 bg-emerald-950/60 text-emerald-300'
+                  ? 'border-white bg-white/20 text-white font-medium'
                   : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white'
               }`}
               title="Toggle webcam face tracking on 3D grid"

@@ -337,8 +337,8 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied!</span>
+                      <Check className="w-3.5 h-3.5 text-white" />
+                      <span className="text-white">Copied!</span>
                     </>
                   ) : (
                     <>
@@ -388,7 +388,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
           <div className="flex-1 flex flex-col overflow-hidden bg-black p-3 sm:p-4 text-xs sm:text-sm leading-relaxed text-zinc-200">
             {hasContent ? (
               <>
-                {/* Format Teks Toolbar (B, I, U, H1, H2, List, Reset, and Timestamp Mode Selector) */}
+                {/* Rich Text Formatting Toolbar (B, I, U, H1, H2, List, Reset, and Timestamp Mode Selector) */}
                 <div className="w-full rounded-none bg-[#090a0f] border border-zinc-800 p-1.5 sm:p-2 mb-2.5 flex items-center flex-wrap gap-1.5 select-none">
                   <span className="text-[11px] font-mono text-zinc-500 uppercase px-1.5">
                     FORMAT:
@@ -526,7 +526,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                   <div className="ml-auto text-[11px] font-mono text-zinc-500 pr-1 sm:pr-2 flex items-center gap-2">
                     <span>{wordCount} words</span>
                     <span className="text-zinc-700 hidden sm:inline">•</span>
-                    <span className="text-emerald-400 font-sans hidden sm:inline">Editable</span>
+                    <span className="text-zinc-300 font-sans hidden sm:inline">Editable</span>
                   </div>
                 </div>
 

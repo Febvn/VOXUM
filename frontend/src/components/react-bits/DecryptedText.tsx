@@ -25,7 +25,7 @@ export function DecryptedText({
   useOriginalCharsOnly = false,
   characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+~`|}{[]:;?><,./-=',
   className = '',
-  encryptedClassName = 'text-emerald-500/50 font-mono',
+  encryptedClassName = 'text-zinc-500 font-mono',
   parentClassName = '',
   animateOn = 'hover',
   clickMode = 'once',

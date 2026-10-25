@@ -38,7 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-mono">
       <SpotlightCard
-        spotlightColor="rgba(16, 185, 129, 0.15)"
+        spotlightColor="rgba(255, 255, 255, 0.12)"
         className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-4 sm:p-6 shadow-2xl relative space-y-4 sm:space-y-5 max-h-[92vh] overflow-y-auto"
       >
         <button
@@ -49,7 +49,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-slate-950 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <div className="size-10 rounded-xl bg-slate-950 border border-white/20 flex items-center justify-center text-white">
             <Key className="size-5" />
           </div>
           <div>
@@ -64,7 +64,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Gemini API Key */}
           <div>
             <label className="font-semibold text-slate-300 flex items-center gap-1.5 mb-1.5 uppercase">
-              <Key className="size-3.5 text-emerald-400" />
+              <Key className="size-3.5 text-white" />
               <span>Google Gemini API Key (Direct Browser Mode)</span>
             </label>
             <input
@@ -72,10 +72,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               value={tempKey}
               onChange={(e) => setTempKey(e.target.value)}
               placeholder="AIzaSy..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-white font-mono"
             />
             <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-              <ShieldCheck className="size-3 text-emerald-400" />
+              <ShieldCheck className="size-3 text-white" />
               <span>Zero-Timeout client direct streaming (LocalStorage encryption).</span>
             </p>
           </div>
@@ -91,14 +91,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               value={tempUrl}
               onChange={(e) => setTempUrl(e.target.value)}
               placeholder="http://localhost:8000"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-white font-mono"
             />
           </div>
 
           {/* Info Card */}
           <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-200 font-bold">
-              <Cpu className="size-3.5 text-emerald-400" />
+              <Cpu className="size-3.5 text-white" />
               <span>WHISTLE COMPACT RUNTIME (16.9 MB)</span>
             </div>
             <p className="font-sans">
@@ -110,7 +110,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <Magnet padding={15} magnetStrength={3} className="w-full">
           <button
             onClick={handleSave}
-            className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/40"
+            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md"
           >
             {saved ? <Check className="size-4" /> : null}
             <span>{saved ? 'CONFIG SAVED' : 'SAVE CONFIGURATION'}</span>

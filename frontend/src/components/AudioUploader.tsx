@@ -127,12 +127,12 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
       {/* Studio Channel Deck Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/80 pb-4 gap-3">
         {/* Mode Switcher */}
-        <div className="grid grid-cols-2 sm:flex items-center gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800/80 w-full sm:w-fit">
+        <div className="grid grid-cols-2 sm:flex items-center gap-1.5 p-1 bg-slate-950 rounded-none border border-slate-800/80 w-full sm:w-fit">
           <button
             onClick={() => setActiveMode('upload')}
-            className={`flex items-center justify-center gap-2 px-3 py-2 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-mono font-semibold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 sm:px-3.5 sm:py-1.5 rounded-none text-xs font-mono font-semibold transition-all ${
               activeMode === 'upload'
-                ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30 shadow'
+                ? 'bg-white text-black border border-white shadow'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -142,9 +142,9 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
 
           <button
             onClick={() => setActiveMode('record')}
-            className={`flex items-center justify-center gap-2 px-3 py-2 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-mono font-semibold transition-all ${
+            className={`flex items-center justify-center gap-2 px-3 py-2 sm:px-3.5 sm:py-1.5 rounded-none text-xs font-mono font-semibold transition-all ${
               activeMode === 'record'
-                ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30 shadow'
+                ? 'bg-white text-black border border-white shadow'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -157,9 +157,9 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
         <button
           onClick={handleRunDemo}
           disabled={isProcessing}
-          className="text-xs font-mono text-slate-300 hover:text-emerald-400 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500/40 transition-all w-full sm:w-fit"
+          className="text-xs font-mono text-slate-300 hover:text-white flex items-center justify-center gap-2 px-3 py-2 rounded-none bg-slate-950 border border-slate-800 hover:border-white/40 transition-all w-full sm:w-fit"
         >
-          <Play className="size-3 text-emerald-400 fill-current" />
+          <Play className="size-3 text-white fill-current" />
           <span>LOAD BENCHMARK TRACK</span>
         </button>
       </div>
@@ -168,7 +168,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-xs font-mono font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-            <Disc className="size-3.5 text-emerald-400" />
+            <Disc className="size-3.5 text-white" />
             <span>EXECUTIVE SYNTHESIS PRESET</span>
           </label>
           <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
@@ -184,13 +184,13 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
               <button
                 key={tKey}
                 onClick={() => setTemplate(tKey)}
-                className={`w-full flex flex-col items-center text-center p-3 rounded-xl border font-mono transition-all ${
+                className={`w-full flex flex-col items-center text-center p-3 rounded-none border font-mono transition-all ${
                   isSelected
-                    ? 'bg-emerald-950/40 border-emerald-500/60 text-emerald-400 shadow-md shadow-emerald-950/50'
+                    ? 'bg-white/10 border-white text-white shadow-md shadow-white/5'
                     : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                 }`}
               >
-                <Icon className={`size-4 mb-1.5 ${isSelected ? 'text-emerald-400' : 'text-slate-500'}`} />
+                <Icon className={`size-4 mb-1.5 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
                 <span className="text-[11px] font-semibold tracking-tight leading-tight">
                   {TEMPLATE_CONFIGS[tKey].label}
                 </span>
@@ -206,7 +206,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
-            className="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 transition-all rounded-xl p-5 sm:p-8 text-center bg-slate-950/60 flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden"
+            className="border-2 border-dashed border-slate-800 hover:border-white/50 transition-all rounded-none p-5 sm:p-8 text-center bg-slate-950/60 flex flex-col items-center justify-center cursor-pointer group relative overflow-hidden"
             onClick={() => document.getElementById('audio-file-input')?.click()}
           >
             <input
@@ -223,18 +223,18 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                 <div
                   key={i}
                   style={{ height: `${h}px` }}
-                  className="w-1 bg-emerald-500/60 rounded-full"
+                  className="w-1 bg-white/60 rounded-none"
                 />
               ))}
             </div>
 
-            <div className="size-11 sm:size-12 rounded-xl bg-slate-900 border border-slate-800 group-hover:border-emerald-500/40 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition-colors mb-2">
+            <div className="size-11 sm:size-12 rounded-none bg-slate-900 border border-slate-800 group-hover:border-white/40 flex items-center justify-center text-slate-400 group-hover:text-white transition-colors mb-2">
               <FileAudio className="size-5 sm:size-6" />
             </div>
 
             {selectedFile ? (
               <div className="space-y-1">
-                <p className="text-xs sm:text-sm font-mono font-bold text-emerald-400 break-all">
+                <p className="text-xs sm:text-sm font-mono font-bold text-white break-all">
                   {selectedFile.name}
                 </p>
                 <p className="text-[11px] sm:text-xs font-mono text-slate-400">
@@ -253,11 +253,11 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
             )}
           </div>
         ) : (
-          <div className="border border-slate-800 rounded-xl p-5 sm:p-8 text-center bg-slate-950/60 flex flex-col items-center justify-center space-y-4">
+          <div className="border border-slate-800 rounded-none p-5 sm:p-8 text-center bg-slate-950/60 flex flex-col items-center justify-center space-y-4">
             {isRecording ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-center gap-3">
-                  <div className="size-14 sm:size-16 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center relative shadow-lg shadow-red-900/30">
+                  <div className="size-14 sm:size-16 rounded-none bg-red-600/20 border border-red-500/40 flex items-center justify-center relative shadow-lg shadow-red-900/30">
                     <Mic className="size-6 sm:size-7 text-red-500 animate-pulse" />
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                     <div
                       key={i}
                       style={{ height: `${h}px` }}
-                      className="w-1 bg-red-500/80 rounded-full animate-pulse"
+                      className="w-1 bg-red-500/80 rounded-none animate-pulse"
                     />
                   ))}
                 </div>
@@ -283,7 +283,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                 <Magnet padding={12} magnetStrength={2}>
                   <button
                     onClick={stopRecording}
-                    className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xs font-semibold flex items-center gap-2 mx-auto border border-slate-700 transition-colors"
+                    className="px-5 py-2 rounded-none bg-slate-800 hover:bg-slate-700 text-white font-mono text-xs font-semibold flex items-center gap-2 mx-auto border border-slate-700 transition-colors"
                   >
                     <Square className="size-3.5 fill-current" />
                     <span>STOP RECORDING</span>
@@ -295,7 +295,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
                 <Magnet padding={15} magnetStrength={3}>
                   <button
                     onClick={startRecording}
-                    className="size-14 sm:size-16 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 hover:border-emerald-400 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-950/40 transition-transform active:scale-95 mx-auto"
+                    className="size-14 sm:size-16 rounded-none bg-white/10 border border-white/40 hover:border-white flex items-center justify-center text-white shadow-lg shadow-black/40 transition-transform active:scale-95 mx-auto"
                   >
                     <Mic className="size-6 sm:size-7" />
                   </button>
@@ -318,13 +318,13 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="text-[11px] sm:text-xs font-mono text-slate-300 flex items-center gap-1.5 mb-1.5 uppercase">
-              <Globe className="size-3.5 text-emerald-400" />
+              <Globe className="size-3.5 text-white" />
               <span>LANGUAGE MODEL (WHISTLE)</span>
             </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-none px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-white"
             >
               <option value="id">Indonesian (ID - Fine-Tuned CTC)</option>
               <option value="en">English (EN)</option>
@@ -340,7 +340,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
 
           <div>
             <label className="text-[11px] sm:text-xs font-mono text-slate-300 flex items-center gap-1.5 mb-1.5 uppercase">
-              <Tag className="size-3.5 text-emerald-400" />
+              <Tag className="size-3.5 text-white" />
               <span>KEYWORD BIASING (AHO-CORASICK)</span>
             </label>
             <input
@@ -348,7 +348,7 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
               placeholder="e.g. Budi, Whistle, OKR, Q3 Budget"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-none px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-mono text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-white"
             />
             <p className="text-[10px] font-mono text-slate-500 mt-1">
               Biases CTC log-likelihood weights toward organizational vocabulary.
@@ -362,17 +362,17 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
             <Magnet padding={12} magnetStrength={2} className="w-full">
               <StarBorder
                 onClick={handleSubmit}
-                color="#10b981"
+                color="#ffffff"
                 speed="3.5s"
-                backgroundColor="#064e3b"
+                backgroundColor="#18181b"
                 textColor="#ffffff"
-                borderColor="rgba(16, 185, 129, 0.4)"
-                className="w-full cursor-pointer shadow-lg shadow-emerald-950/50"
+                borderColor="rgba(255, 255, 255, 0.4)"
+                className="w-full cursor-pointer shadow-lg shadow-black/50 rounded-none"
               >
                 <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 font-mono font-bold text-xs sm:text-sm text-center">
-                  <Volume2 className="size-4 text-emerald-300 shrink-0" />
+                  <Volume2 className="size-4 text-white shrink-0" />
                   <ShinyText text="EXECUTE TRANSCRIPTION & REASONING" speed={3} className="text-white" />
-                  <ArrowRight className="size-4 text-emerald-300 shrink-0" />
+                  <ArrowRight className="size-4 text-white shrink-0" />
                 </div>
               </StarBorder>
             </Magnet>
@@ -380,20 +380,20 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({ onProcess, isProce
             <button
               onClick={handleSubmit}
               disabled={!selectedFile || isProcessing}
-              className={`w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-xl font-mono font-semibold text-xs flex items-center justify-center gap-2.5 transition-all text-center ${
+              className={`w-full py-3 sm:py-3.5 px-4 sm:px-6 rounded-none font-mono font-semibold text-xs flex items-center justify-center gap-2.5 transition-all text-center ${
                 isProcessing
-                  ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-slate-800 text-white border border-white/30'
                   : 'bg-slate-950 text-slate-600 border border-slate-800 cursor-not-allowed'
               }`}
             >
               {isProcessing ? (
                 <>
-                  <div className="size-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                  <div className="size-4 border-2 border-white border-t-transparent rounded-none animate-spin shrink-0" />
                   <DecryptedText
                     text="PROCESSING AUDIO STREAM WITH WHISTLE & GEMINI FLASH..."
                     speed={25}
                     animateOn="view"
-                    className="text-emerald-400 font-mono text-xs"
+                    className="text-white font-mono text-xs"
                   />
                 </>
               ) : (

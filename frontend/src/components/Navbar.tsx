@@ -188,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   defaultOpen={[0, 1]}
                   defaultActive="studio-ingest"
                   color="#f5f5f5"
-                  accentColor="#c7d9c6"
+                  accentColor="#ffffff"
                   lineColor="#3f3f46"
                   width={260}
                   rowHeight={38}
@@ -219,7 +219,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Drawer Footer */}
             <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-xs text-zinc-500 font-mono">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 bg-white" />
                 <span>Whistle ASR 16.9MB</span>
               </span>
               <span>v2.4.0</span>
