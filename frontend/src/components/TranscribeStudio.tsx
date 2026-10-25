@@ -3,7 +3,7 @@ import {
   CloudUpload,
   RefreshCw
 } from 'lucide-react';
-import type { MeetingTemplate, ProcessResponse } from '../types';
+import type { MeetingTemplate, ProcessResponse, WordTimestamp } from '../types';
 import { generateDemoResponse } from '../services/apiService';
 import { convertMediaToWav } from '../utils/mediaConverter';
 import { GridScan } from './react-bits';
@@ -11,7 +11,12 @@ import { GridScan } from './react-bits';
 export interface TranscribeStudioProps {
   id?: string;
   className?: string;
-  onTranscriptionComplete?: (text: string, fileName?: string) => void;
+  onTranscriptionComplete?: (
+    text: string,
+    fileName?: string,
+    words?: WordTimestamp[],
+    segments?: { start: number; end: number; text: string }[]
+  ) => void;
 }
 
 export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
@@ -69,6 +74,8 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       const cleanBaseUrl = configuredBackendUrl.replace(/\/+$/, '');
 
       let textOutput = '';
+      let wordsOutput: WordTimestamp[] = [];
+      let segmentsOutput: { start: number; end: number; text: string }[] = [];
       try {
         const response = await fetch(`${cleanBaseUrl}/api/process`, {
           method: 'POST',
@@ -81,17 +88,20 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
 
         const data: ProcessResponse = await response.json();
         textOutput = data.transcription?.text || '';
+        wordsOutput = data.transcription?.words || [];
+        segmentsOutput = data.transcription?.segments || [];
       } catch (err) {
         console.warn('Backend call failed, using high-precision fallback output:', err);
         const fallback = generateDemoResponse(template, language);
         textOutput = fallback.transcription.text;
+        wordsOutput = fallback.transcription.words || [];
       }
 
       clearInterval(progressInterval);
       setProgress(100);
       await new Promise((r) => setTimeout(r, 250));
 
-      onTranscriptionComplete?.(textOutput, targetFileName);
+      onTranscriptionComplete?.(textOutput, targetFileName, wordsOutput, segmentsOutput);
 
       const el = document.getElementById('studio-grid-continuation');
       if (el) {
@@ -143,7 +153,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       await new Promise((r) => setTimeout(r, 200));
 
       const sample = generateDemoResponse(template, language);
-      onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav');
+      onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav', sample.transcription.words);
       setIsProcessing(false);
       setProgress(0);
 

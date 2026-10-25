@@ -102,6 +102,7 @@ async def process_audio(
                 "latency_ms": asr_result.get("latency_ms", 0),
                 "tokens_per_sec": asr_result.get("tokens_per_sec", 1319),
                 "words": asr_result.get("words", []),
+                "segments": asr_result.get("segments", []),
                 "engine": asr_result.get("engine", "whistle")
             },
             "meeting_notes": notes_result

@@ -48,11 +48,17 @@ class WhistleASRService:
 
                 transcript_parts = []
                 words = []
+                segments_data = []
 
                 for segment in segments:
                     cleaned_seg = segment.text.strip()
                     if cleaned_seg:
                         transcript_parts.append(cleaned_seg)
+                        segments_data.append({
+                            "start": round(segment.start, 2),
+                            "end": round(segment.end, 2),
+                            "text": cleaned_seg
+                        })
 
                     if word_timestamps and segment.words:
                         for w in segment.words:
@@ -71,9 +77,12 @@ class WhistleASRService:
                 if not words and full_text:
                     words = self._generate_fallback_timestamps(full_text)
 
+                if not segments_data and full_text:
+                    segments_data = [{"start": 0.0, "end": max(1.0, round(len(full_text) / 15, 2)), "text": full_text}]
+
                 detected_lang = info.language if info and info.language else (language or "multi")
 
-                logger.info(f"Whistle ASR transcription complete: lang={detected_lang}, chars={len(full_text)}, latency={latency_ms}ms")
+                logger.info(f"Whistle ASR transcription complete: lang={detected_lang}, chars={len(full_text)}, latency={latency_ms}ms, segments={len(segments_data)}")
 
                 return {
                     "text": full_text,
@@ -81,6 +90,7 @@ class WhistleASRService:
                     "latency_ms": latency_ms,
                     "tokens_per_sec": 1319,
                     "words": words,
+                    "segments": segments_data,
                     "engine": f"whistle-faster-whisper-{self.model_size}"
                 }
             except Exception as e:
@@ -110,6 +120,9 @@ class WhistleASRService:
             "latency_ms": latency_ms,
             "tokens_per_sec": 1319,
             "words": words,
+            "segments": [
+                {"start": 0.0, "end": 4.5, "text": sample_text}
+            ],
             "engine": "whistle-demo-fallback"
         }
 

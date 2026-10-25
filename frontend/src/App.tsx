@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowDown } from 'lucide-react';
+import type { WordTimestamp } from './types';
 import { Navbar } from './components/Navbar';
 import { FlatGridWave } from './components/react-bits';
 import { useGridSpacing } from './utils/gridSpacing';
@@ -23,11 +24,20 @@ export function App() {
   const [activePlan, setActivePlan] = useState<string>('free');
   const [transcriptText, setTranscriptText] = useState<string>('');
   const [transcriptFileName, setTranscriptFileName] = useState<string>('voxtum_transcript.txt');
+  const [transcriptWords, setTranscriptWords] = useState<WordTimestamp[]>([]);
+  const [transcriptSegments, setTranscriptSegments] = useState<{ start: number; end: number; text: string }[]>([]);
   const gridSpacing = useGridSpacing();
 
-  const handleTranscriptionComplete = (text: string, fileName?: string) => {
+  const handleTranscriptionComplete = (
+    text: string,
+    fileName?: string,
+    words?: WordTimestamp[],
+    segments?: { start: number; end: number; text: string }[]
+  ) => {
     setTranscriptText(text);
     if (fileName) setTranscriptFileName(fileName);
+    if (words) setTranscriptWords(words);
+    if (segments) setTranscriptSegments(segments);
     const el = document.getElementById('studio-grid-continuation');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -163,6 +173,8 @@ export function App() {
             transcriptText={transcriptText}
             onTranscriptChange={setTranscriptText}
             fileName={transcriptFileName}
+            words={transcriptWords}
+            segments={transcriptSegments}
           />
         </div>
       </section>

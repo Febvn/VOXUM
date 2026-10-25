@@ -40,6 +40,7 @@ export interface ProcessResponse {
     latency_ms: number;
     tokens_per_sec: number;
     words: WordTimestamp[];
+    segments?: { start: number; end: number; text: string }[];
     engine: string;
   };
   meeting_notes: MeetingNotes;
@@ -57,6 +58,7 @@ export interface SavedMeetingSession {
     latency_ms: number;
     tokens_per_sec: number;
     words: WordTimestamp[];
+    segments?: { start: number; end: number; text: string }[];
     engine: string;
   };
   meeting_notes: MeetingNotes;
