@@ -6,6 +6,8 @@ import { MeetingNotesView } from './components/MeetingNotesView';
 import { SettingsModal } from './components/SettingsModal';
 import { MeetingHistoryDrawer } from './components/MeetingHistoryDrawer';
 import { PricingModal } from './components/PricingModal';
+import { AuthModal } from './components/AuthModal';
+import type { AuthUser } from './types/auth';
 import { Squares, SpotlightCard, ShinyText, DecryptedText, ShapeWaves } from './components/react-bits';
 import type { ProcessResponse, SavedMeetingSession, MeetingTemplate, MeetingNotes } from './types';
 import {
@@ -34,6 +36,10 @@ export function App() {
   const [backendUrl, setBackendUrl] = useState<string>('http://localhost:8000');
   const [currentPlan, setCurrentPlan] = useState<'free' | 'pro' | 'enterprise'>('pro');
 
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
@@ -55,6 +61,15 @@ export function App() {
     const savedPlan = localStorage.getItem('saas_plan') as 'free' | 'pro' | 'enterprise' | null;
     if (savedPlan) setCurrentPlan(savedPlan);
 
+    const savedUserRaw = localStorage.getItem('voxtum_current_user');
+    if (savedUserRaw) {
+      try {
+        setUser(JSON.parse(savedUserRaw));
+      } catch (e) {
+        console.error('Failed to parse current user:', e);
+      }
+    }
+
     const historyRaw = localStorage.getItem('meeting_history');
     if (historyRaw) {
       try {
@@ -64,6 +79,27 @@ export function App() {
       }
     }
   }, []);
+
+  const handleLoginSuccess = (authenticatedUser: AuthUser) => {
+    setUser(authenticatedUser);
+    localStorage.setItem('voxtum_current_user', JSON.stringify(authenticatedUser));
+    setNotice({
+      type: 'success',
+      text: `Signed in as ${authenticatedUser.name} (${authenticatedUser.email}) via ${
+        authenticatedUser.provider === 'google' ? 'Google' : 'VOXTUM Account'
+      }.`
+    });
+  };
+
+  const handleSignOut = () => {
+    const prevName = user?.name || 'Account';
+    setUser(null);
+    localStorage.removeItem('voxtum_current_user');
+    setNotice({
+      type: 'success',
+      text: `${prevName} signed out successfully.`
+    });
+  };
 
   const handleSaveApiKey = (key: string) => {
     setApiKey(key);
@@ -250,6 +286,16 @@ export function App() {
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenPricing={() => setIsPricingOpen(true)}
+          onOpenSignIn={() => {
+            setAuthMode('signin');
+            setIsAuthOpen(true);
+          }}
+          onOpenSignUp={() => {
+            setAuthMode('signup');
+            setIsAuthOpen(true);
+          }}
+          onSignOut={handleSignOut}
+          user={user}
           apiKeySet={Boolean(apiKey)}
           historyCount={savedMeetings.length}
           currentPlan={currentPlan}
@@ -751,6 +797,13 @@ export function App() {
           onClose={() => setIsPricingOpen(false)}
           currentPlan={currentPlan}
           onUpgrade={handleUpgradePlan}
+        />
+
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          initialMode={authMode}
+          onLoginSuccess={handleLoginSuccess}
         />
       </div>
     </div>
