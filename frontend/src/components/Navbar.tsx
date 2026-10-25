@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
-import { Menu, X, Settings } from 'lucide-react';
+import {
+  Menu,
+  X,
+  Settings,
+  Mic,
+  FileText,
+  Clock,
+  Cpu,
+  Layers,
+  ShieldCheck,
+  CreditCard,
+  HelpCircle
+} from 'lucide-react';
 import { VoxtumLogo } from './VoxtumLogo';
 import BranchedMenu, { type BranchedMenuItem } from './react-bits/BranchedMenu';
-import {
-  Rocket01Icon,
-  Download04Icon,
-  Settings02Icon,
-  PaintBoardIcon,
-  CursorPointer01Icon,
-  Layers01Icon,
-  TextFontIcon,
-  Notification03Icon
-} from '@hugeicons/core-free-icons';
 
 interface NavbarProps {
   onOpenSettings?: () => void;
@@ -25,21 +27,21 @@ interface NavbarProps {
 
 const MENU_ITEMS: BranchedMenuItem[] = [
   {
-    label: 'Getting started',
+    label: 'Speech Studio',
     children: [
-      { value: 'overview', label: 'Overview', icon: Rocket01Icon },
-      { value: 'models', label: 'Models & Audio', icon: Download04Icon },
-      { value: 'config', label: 'Configuration', icon: Settings02Icon },
-      { value: 'theming', label: 'Theme & Styling', icon: PaintBoardIcon }
+      { value: 'studio-ingest', label: 'Audio & Video Ingest', icon: <Mic className="w-4 h-4 text-zinc-300" /> },
+      { value: 'studio-editor', label: 'Transcription Editor', icon: <FileText className="w-4 h-4 text-zinc-300" /> },
+      { value: 'studio-timestamps', label: 'Timestamp View Modes', icon: <Clock className="w-4 h-4 text-zinc-300" /> },
+      { value: 'studio-engine', label: 'Engine Configuration', icon: <Cpu className="w-4 h-4 text-zinc-300" /> }
     ]
   },
   {
-    label: 'Interactive UI',
+    label: 'Platform & Architecture',
     children: [
-      { value: 'specular', label: 'Specular Buttons', icon: CursorPointer01Icon },
-      { value: 'waves', label: 'ShapeWaves Canvas', icon: Layers01Icon },
-      { value: 'typography', label: 'Geist Typography', icon: TextFontIcon },
-      { value: 'toasts', label: 'Notifications', icon: Notification03Icon }
+      { value: 'platform-pipeline', label: 'Media Pipeline', icon: <Layers className="w-4 h-4 text-zinc-300" /> },
+      { value: 'platform-privacy', label: 'Air-Gapped Privacy', icon: <ShieldCheck className="w-4 h-4 text-zinc-300" /> },
+      { value: 'platform-pricing', label: 'Plans & Compute', icon: <CreditCard className="w-4 h-4 text-zinc-300" /> },
+      { value: 'platform-support', label: 'Help & Support', icon: <HelpCircle className="w-4 h-4 text-zinc-300" /> }
     ]
   }
 ];
@@ -183,8 +185,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="py-2">
                 <BranchedMenu
                   items={MENU_ITEMS}
-                  defaultOpen={[0]}
-                  defaultActive="overview"
+                  defaultOpen={[0, 1]}
+                  defaultActive="studio-ingest"
                   color="#f5f5f5"
                   accentColor="#c7d9c6"
                   lineColor="#3f3f46"
@@ -192,7 +194,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                   rowHeight={38}
                   fontSize={14}
                   onSelect={(value) => {
-                    console.log('Selected:', value);
+                    setIsSidebarOpen(false);
+                    if (value === 'studio-ingest') {
+                      document.getElementById('studio')?.scrollIntoView({ behavior: 'smooth' });
+                    } else if (value === 'studio-editor' || value === 'studio-timestamps') {
+                      document.getElementById('studio-grid-continuation')?.scrollIntoView({ behavior: 'smooth' });
+                    } else if (value === 'studio-engine') {
+                      onOpenSettings?.();
+                    } else if (value === 'platform-pipeline') {
+                      document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                    } else if (value === 'platform-privacy') {
+                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                    } else if (value === 'platform-pricing') {
+                      if (onOpenPricing) onOpenPricing();
+                      else document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                    } else if (value === 'platform-support') {
+                      document.getElementById('support')?.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }}
                 />
               </div>
@@ -200,8 +218,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Drawer Footer */}
             <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-xs text-zinc-500 font-mono">
-              <span>VOXTUM Core</span>
-              <span>React Bits</span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Whistle ASR 16.9MB</span>
+              </span>
+              <span>v2.4.0</span>
             </div>
           </aside>
         </div>
