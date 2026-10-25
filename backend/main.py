@@ -45,9 +45,9 @@ class SummarizeRequest(BaseModel):
 def read_root():
     return {
         "app": "Peluit.ai SaaS Backend",
-        "asr_engine": "Whistle (16.9 MB)",
-        "model_path": asr_service.model_path,
-        "model_exists": os.path.exists(asr_service.model_path),
+        "asr_engine": "Whistle ASR (faster-whisper int8)",
+        "model_size": asr_service.model_size,
+        "engine_ready": asr_service.engine is not None,
         "status": "ready"
     }
 

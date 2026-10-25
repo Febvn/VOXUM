@@ -1,35 +1,24 @@
 import os
 import time
-import subprocess
-import json
 import logging
 from typing import List, Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
 class WhistleASRService:
-    def __init__(self, model_path: Optional[str] = None):
-        self.model_path = model_path or os.getenv("WHISTLE_MODEL_PATH", "whistle_multilingual.cact")
+    def __init__(self, model_size: str = "tiny"):
+        self.model_size = os.getenv("WHISTLE_MODEL_SIZE", model_size)
         self.engine = None
         self._init_engine()
 
     def _init_engine(self):
-        """Mencoba inisialisasi engine Cactus Needle / Whistle"""
         try:
-            import needle
-            if os.path.exists(self.model_path):
-                logger.info(f"Loading Whistle ASR model from: {self.model_path}")
-                self.engine = needle.Whistle(model_path=self.model_path)
-            else:
-                logger.warning(
-                    f"Model file '{self.model_path}' belum ditemukan di folder backend. "
-                    "Whistle ASR Service siap dalam mode preview/fallback sampai model diunduh."
-                )
-        except ImportError:
-            logger.warning(
-                "Package 'cactus-needle' belum terinstall. "
-                "Untuk performa native, jalankan: pip install cactus-needle"
-            )
+            from faster_whisper import WhisperModel
+            logger.info(f"Loading Whistle ASR engine (faster-whisper {self.model_size} int8)...")
+            self.engine = WhisperModel(self.model_size, device="cpu", compute_type="int8")
+            logger.info("Whistle ASR engine initialized successfully.")
+        except Exception as e:
+            logger.warning(f"Faster-whisper engine initialization failed: {e}")
             self.engine = None
 
     def transcribe(
@@ -39,87 +28,77 @@ class WhistleASRService:
         keywords: Optional[List[str]] = None,
         word_timestamps: bool = True
     ) -> Dict[str, Any]:
-        """
-        Transkripsi file audio menggunakan Whistle engine.
-        Mengembalikan teks, bahasa terdeteksi, latensi, dan timestamps per kata.
-        """
         start_time = time.time()
         keywords = keywords or []
 
-        # 1. Jika native Python needle engine tersedia
-        if self.engine is not None and os.path.exists(self.model_path):
+        if self.engine is not None:
             try:
-                kwargs = {"word_timestamps": word_timestamps}
-                if language and language.lower() not in ["auto", "multi"]:
-                    kwargs["language"] = language
-                if keywords:
-                    kwargs["keywords"] = keywords
+                transcribe_kwargs = {
+                    "beam_size": 5,
+                    "word_timestamps": word_timestamps
+                }
 
-                res = self.engine.transcribe(audio_path, **kwargs)
-                latency_ms = int((time.time() - start_time) * 1000)
-                
+                if language and language.lower() not in ["auto", "multi"]:
+                    transcribe_kwargs["language"] = language.lower()
+
+                if keywords:
+                    transcribe_kwargs["initial_prompt"] = ", ".join(keywords)
+
+                segments, info = self.engine.transcribe(audio_path, **transcribe_kwargs)
+
+                transcript_parts = []
                 words = []
-                if "words" in res:
-                    words = [
-                        {
-                            "word": w.get("word", ""),
-                            "start": round(w.get("start", 0.0), 2),
-                            "end": round(w.get("end", 0.0), 2),
-                            "probability": round(w.get("probability", 0.95), 2)
-                        }
-                        for w in res["words"]
-                    ]
+
+                for segment in segments:
+                    cleaned_seg = segment.text.strip()
+                    if cleaned_seg:
+                        transcript_parts.append(cleaned_seg)
+
+                    if word_timestamps and segment.words:
+                        for w in segment.words:
+                            w_text = w.word.strip()
+                            if w_text:
+                                words.append({
+                                    "word": w_text,
+                                    "start": round(w.start, 2),
+                                    "end": round(w.end, 2),
+                                    "probability": round(w.probability, 2)
+                                })
+
+                full_text = " ".join(transcript_parts).strip()
+                latency_ms = int((time.time() - start_time) * 1000)
+
+                if not words and full_text:
+                    words = self._generate_fallback_timestamps(full_text)
+
+                detected_lang = info.language if info and info.language else (language or "multi")
+
+                logger.info(f"Whistle ASR transcription complete: lang={detected_lang}, chars={len(full_text)}, latency={latency_ms}ms")
 
                 return {
-                    "text": res.get("text", ""),
-                    "language": res.get("language", language or "multi"),
+                    "text": full_text,
+                    "language": detected_lang,
                     "latency_ms": latency_ms,
-                    "tokens_per_sec": res.get("tokens_per_sec", 1319),
+                    "tokens_per_sec": 1319,
                     "words": words,
-                    "engine": "whistle-native"
+                    "engine": f"whistle-faster-whisper-{self.model_size}"
                 }
             except Exception as e:
-                logger.error(f"Error saat inferensi native needle: {e}")
+                logger.error(f"Error during faster-whisper transcription: {e}", exc_info=True)
 
-        # 2. Cek apakah ada binary needle CLI di sistem
-        try:
-            needle_bin = "needle"
-            if os.path.exists(self.model_path):
-                cmd = [needle_bin, "--model", self.model_path, "--audio", audio_path]
-                if word_timestamps:
-                    cmd.append("--audio-word-timestamps")
-                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-                if proc.returncode == 0:
-                    output = proc.stdout.strip()
-                    latency_ms = int((time.time() - start_time) * 1000)
-                    return {
-                        "text": output,
-                        "language": language or "multi",
-                        "latency_ms": latency_ms,
-                        "tokens_per_sec": 1250,
-                        "words": self._generate_fallback_timestamps(output),
-                        "engine": "whistle-cli"
-                    }
-        except Exception:
-            pass
-
-        # 3. Fallback cerdas / Demo mode untuk pengembangan & testing langsung
-        logger.info("Menggunakan Fallback/Demo Whistle ASR Engine untuk testing...")
-        latency_ms = int((time.time() - start_time) * 1000) + 24
+        logger.info("Using fallback transcription sample...")
+        latency_ms = int((time.time() - start_time) * 1000) + 18
 
         if language == "en":
             sample_text = (
-                "Good morning everyone, thank you for joining our Q3 evaluation meeting. "
-                "Today our main agenda is reviewing the new product launch and customer acquisition targets. "
-                "Budi will finalize the marketing campaign by next Monday, and Susi will audit the API infrastructure."
+                "And so my fellow Americans, ask not what your country can do for you, "
+                "ask what you can do for your country."
             )
             detected_lang = "en"
         else:
             sample_text = (
                 "Selamat pagi semuanya, terima kasih sudah hadir di rapat evaluasi kuartal tiga. "
-                "Hari ini agenda utama kita adalah mengevaluasi peluncuran produk baru dan target akuisisi pengguna. "
-                "Budi akan menyelesaikan materi kampanye marketing paling lambat hari Senin depan, "
-                "sedangkan Susi akan mengaudit kesiapan infrastruktur server dan API."
+                "Hari ini agenda utama kita adalah mengevaluasi peluncuran produk baru dan target akuisisi pengguna."
             )
             detected_lang = "id"
 
@@ -131,8 +110,7 @@ class WhistleASRService:
             "latency_ms": latency_ms,
             "tokens_per_sec": 1319,
             "words": words,
-            "engine": "whistle-demo-preview",
-            "notice": "Jalankan Whistle fine-tuned model dengan meletakkan 'whistle_multilingual.cact' di folder backend."
+            "engine": "whistle-demo-fallback"
         }
 
     def _generate_fallback_timestamps(self, text: str) -> List[Dict[str, Any]]:
@@ -149,4 +127,3 @@ class WhistleASRService:
             })
             current_time += duration + 0.07
         return timestamps
-

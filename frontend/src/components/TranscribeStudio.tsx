@@ -110,18 +110,28 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
 
   const loadSampleDemo = async () => {
     if (isProcessing) return;
-    setIsProcessing(true);
-    setProcessingStep('Menyiapkan file audio contoh...');
-    await new Promise((r) => setTimeout(r, 600));
+    try {
+      const sampleUrl = language === 'id' ? '/samples/sample_bahasa_indonesia.mp3' : '/samples/sample_jfk.mp3';
+      const sampleName = language === 'id' ? 'sample_bahasa_indonesia.mp3' : 'sample_jfk.mp3';
+      const res = await fetch(sampleUrl);
+      if (!res.ok) throw new Error('Failed to load sample file');
+      const blob = await res.blob();
+      const file = new File([blob], sampleName, { type: 'audio/mpeg' });
+      await handleFileSelect(file);
+    } catch {
+      setIsProcessing(true);
+      setProcessingStep('Menyiapkan file audio contoh...');
+      await new Promise((r) => setTimeout(r, 600));
 
-    const sample = generateDemoResponse(template, language);
-    onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav');
-    setIsProcessing(false);
-    setProcessingStep('');
+      const sample = generateDemoResponse(template, language);
+      onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav');
+      setIsProcessing(false);
+      setProcessingStep('');
 
-    const el = document.getElementById('studio-grid-continuation');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      const el = document.getElementById('studio-grid-continuation');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
