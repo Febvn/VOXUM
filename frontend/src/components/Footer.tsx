@@ -20,40 +20,40 @@ export const Footer: React.FC = () => {
 
               {/* Headline Tagline */}
               <h3 className="text-xl sm:text-2xl font-medium text-white max-w-xs leading-snug tracking-tight">
-                Transform your speech, elevate your workflow
+                Sub-second speech intelligence, engineered for privacy
               </h3>
             </div>
 
             {/* Sub-note */}
             <p className="text-xs text-zinc-500 font-normal">
-              Premium audio intelligence since 2024
+              Local &amp; air-gapped speech recognition
             </p>
           </div>
 
           {/* Right Columns: 3 bordered columns matching the reference screenshot */}
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 border-t sm:border-t-0 sm:border-l border-zinc-800/80 divide-y sm:divide-y-0 sm:divide-x divide-zinc-800/80">
-            {/* Column 1: Programs / Platform */}
+            {/* Column 1: Platform */}
             <div className="py-6 sm:py-0 sm:px-8 space-y-5">
-              <h4 className="text-sm font-semibold text-white">Programs</h4>
+              <h4 className="text-sm font-semibold text-white">Platform</h4>
               <ul className="space-y-3.5 text-xs text-zinc-400">
                 <li>
-                  <a href="#personal-training" className="hover:text-white transition-colors">
-                    Personal Training
+                  <a href="#studio" className="hover:text-white transition-colors">
+                    Transcription Studio
                   </a>
                 </li>
                 <li>
-                  <a href="#nutrition" className="hover:text-white transition-colors">
-                    Nutrition Coaching
+                  <a href="#features" className="hover:text-white transition-colors">
+                    Multi-Format Extraction
                   </a>
                 </li>
                 <li>
-                  <a href="#group" className="hover:text-white transition-colors">
-                    Group Classes
+                  <a href="#studio-grid-continuation" className="hover:text-white transition-colors">
+                    Timestamp Alignment
                   </a>
                 </li>
                 <li>
-                  <a href="#membership" className="hover:text-white transition-colors">
-                    Online Membership
+                  <a href="#about" className="hover:text-white transition-colors">
+                    Local Whistle Daemon
                   </a>
                 </li>
               </ul>
@@ -65,17 +65,27 @@ export const Footer: React.FC = () => {
               <ul className="space-y-3.5 text-xs text-zinc-400">
                 <li>
                   <a href="#about" className="hover:text-white transition-colors">
-                    About Us
+                    About &amp; Core Pillars
                   </a>
                 </li>
                 <li>
-                  <a href="#blog" className="hover:text-white transition-colors">
-                    Blog
+                  <a href="#features" className="hover:text-white transition-colors">
+                    Acoustic Benchmarks
                   </a>
                 </li>
                 <li>
-                  <a href="#stories" className="hover:text-white transition-colors inline-flex items-center gap-1">
-                    Success Stories <span className="text-[10px]">↗</span>
+                  <a href="#support" className="hover:text-white transition-colors">
+                    Codec Specifications
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/Febvn/VOXUM"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors inline-flex items-center gap-1"
+                  >
+                    GitHub Repository <span className="text-[10px]">↗</span>
                   </a>
                 </li>
               </ul>
@@ -87,22 +97,22 @@ export const Footer: React.FC = () => {
               <ul className="space-y-3.5 text-xs text-zinc-400">
                 <li>
                   <a href="#support" className="hover:text-white transition-colors">
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href="#portal" className="hover:text-white transition-colors inline-flex items-center gap-1">
-                    Member Portal <span className="text-[10px]">↗</span>
+                    Documentation
                   </a>
                 </li>
                 <li>
                   <a href="#support" className="hover:text-white transition-colors">
-                    FAQ
+                    Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#privacy" className="hover:text-white transition-colors">
-                    Privacy Policy
+                  <a href="#pricing" className="hover:text-white transition-colors">
+                    Pricing &amp; Plans
+                  </a>
+                </li>
+                <li>
+                  <a href="#about" className="hover:text-white transition-colors">
+                    Privacy Guarantee
                   </a>
                 </li>
               </ul>

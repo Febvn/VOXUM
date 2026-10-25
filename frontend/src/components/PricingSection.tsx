@@ -33,7 +33,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
           />
         </h2>
         <p className="text-xs sm:text-sm text-zinc-400">
-          Transparent compute allocation, developer seats, and enterprise security options.
+          Predictable speech processing tiers, local runtime licenses, and air-gapped enterprise options.
         </p>
       </div>
 
@@ -112,7 +112,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight uppercase">Hobby</h3>
               <p className="text-xs text-zinc-400 mt-1 min-h-[32px]">
-                Everything you need to explore speech AI
+                Essential browser transcription for personal recordings
               </p>
 
               {/* Price */}
@@ -125,19 +125,19 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <ul className="space-y-3 text-xs text-zinc-300 mb-8">
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Up to 2 collaborators</span>
+                  <span>Up to 30 min per audio file</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>5 active projects</span>
+                  <span>MP3, WAV, MP4 &amp; WebM support</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>10k API requests / month</span>
+                  <span>[MM:SS] &amp; seconds timecodes</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Community support</span>
+                  <span>Client-side export to .TXT</span>
                 </li>
               </ul>
             </div>
@@ -161,7 +161,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-1 min-h-[32px]">
-                For production teams shipping intelligence fast
+                High-speed speech transcription for professional teams
               </p>
 
               {/* Price */}
@@ -176,27 +176,27 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <ul className="space-y-3 text-xs text-zinc-300 mb-8">
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Unlimited projects and views</span>
+                  <span>Unlimited audio and video length</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Branch-based previews</span>
+                  <span>Local daemon + GPU acceleration</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Up to 15 collaborators</span>
+                  <span>Aho-Corasick keyword biasing</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>250k API requests / month</span>
+                  <span>Full rich text editor (B, I, U, H1, H2)</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Shared component library</span>
+                  <span>All 4 timestamp alignment modes</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Priority email support</span>
+                  <span>Priority processing queue</span>
                 </li>
               </ul>
             </div>
@@ -215,7 +215,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
             <div>
               <h3 className="text-xl font-bold text-white tracking-tight uppercase">Business</h3>
               <p className="text-xs text-zinc-400 mt-1 min-h-[32px]">
-                Governance, private tenancy, and scale for orgs
+                Air-gapped deployment, custom models, and SLA
               </p>
 
               {/* Price */}
@@ -227,27 +227,27 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               <ul className="space-y-3 text-xs text-zinc-300 mb-8">
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Unlimited seats</span>
+                  <span>Self-hosted air-gapped daemon</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>SSO / SAML and SCIM</span>
+                  <span>Custom acoustic model fine-tuning</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Custom data residency</span>
+                  <span>Zero cloud data retention compliance</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>SOC 2 Type II + HIPAA BAA</span>
+                  <span>SSO / SAML &amp; SCIM sync</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>99.99% uptime SLA</span>
+                  <span>99.99% uptime SLA guarantee</span>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="w-3.5 h-3.5 text-zinc-400 stroke-[2.5] shrink-0" />
-                  <span>Named support engineer</span>
+                  <span>Dedicated speech engineer</span>
                 </li>
               </ul>
             </div>
@@ -265,71 +265,71 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
         {/* Feature Comparison Matrix Table (Full-Bleed, Square Layout) */}
         <div className="w-full overflow-x-auto">
           <div className="min-w-[760px] w-full">
-            {/* Category 1 Header: Workspace */}
+            {/* Category 1 Header: Audio Capacity */}
             <div className="bg-black px-6 sm:px-8 py-3.5 border-y border-zinc-800 text-xs font-bold text-zinc-300 uppercase tracking-wider">
-              Workspace &amp; Capacity
+              Audio &amp; Video Ingestion Capacity
             </div>
 
-            {/* Row 1: Collaborators */}
+            {/* Row 1: Max file length */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Collaborators</span>
-              <span className="text-zinc-400 text-center font-mono">Up to 2</span>
-              <span className="text-zinc-400 text-center font-mono">Up to 15</span>
-              <span className="text-zinc-400 text-center font-mono">Unlimited</span>
-            </div>
-
-            {/* Row 2: Workspaces */}
-            <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Workspaces</span>
-              <span className="text-zinc-400 text-center">Personal only</span>
-              <span className="text-zinc-400 text-center">Team + Personal</span>
-              <span className="text-zinc-400 text-center">Custom org structure</span>
-            </div>
-
-            {/* Row 3: Projects per workspace */}
-            <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Projects per workspace</span>
-              <span className="text-zinc-400 text-center font-mono">5</span>
+              <span className="text-zinc-300 font-medium">Max audio length per file</span>
+              <span className="text-zinc-400 text-center font-mono">30 min / file</span>
               <span className="text-zinc-400 text-center font-mono">Unlimited</span>
               <span className="text-zinc-400 text-center font-mono">Unlimited</span>
             </div>
 
-            {/* Row 4: Audio storage & retention */}
+            {/* Row 2: Media formats */}
+            <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
+              <span className="text-zinc-300 font-medium">Supported media formats</span>
+              <span className="text-zinc-400 text-center">MP3, WAV, MP4, WebM</span>
+              <span className="text-zinc-400 text-center">All audio + video formats</span>
+              <span className="text-zinc-400 text-center">Custom codecs &amp; multichannel</span>
+            </div>
+
+            {/* Row 3: Client extraction */}
+            <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
+              <span className="text-zinc-300 font-medium">Client-side 16kHz extraction</span>
+              <div className="flex justify-center">
+                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
+                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
+                </span>
+              </div>
+              <div className="flex justify-center">
+                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
+                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
+                </span>
+              </div>
+              <div className="flex justify-center">
+                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
+                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
+                </span>
+              </div>
+            </div>
+
+            {/* Row 4: Batch queue */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Audio storage retention</span>
-              <span className="text-zinc-400 text-center font-mono">30 Days</span>
-              <span className="text-zinc-400 text-center font-mono">1 Year</span>
-              <span className="text-zinc-400 text-center font-mono">Infinite</span>
+              <span className="text-zinc-300 font-medium">Batch processing queue</span>
+              <span className="text-zinc-400 text-center font-mono">Single file</span>
+              <span className="text-zinc-400 text-center font-mono">Up to 25 files</span>
+              <span className="text-zinc-400 text-center font-mono">Unlimited batch</span>
             </div>
 
-            {/* Category 2 Header: Platform & Collaboration */}
+            {/* Category 2 Header: ASR Engine & Features */}
             <div className="bg-black px-6 sm:px-8 py-3.5 border-b border-zinc-800 text-xs font-bold text-zinc-300 uppercase tracking-wider">
-              Platform &amp; Workflow Features
+              ASR Engine &amp; Formatting Features
             </div>
 
-            {/* Row 5: Real-time collaborative editor */}
+            {/* Row 5: Timestamp modes */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Real-time collaborative editor</span>
-              <div className="flex justify-center">
-                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
-                </span>
-              </div>
-              <div className="flex justify-center">
-                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
-                </span>
-              </div>
-              <div className="flex justify-center">
-                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
-                </span>
-              </div>
+              <span className="text-zinc-300 font-medium">Timestamp alignment modes</span>
+              <span className="text-zinc-400 text-center font-mono">Plain &amp; [MM:SS]</span>
+              <span className="text-zinc-400 text-center font-mono">All 4 timestamp modes</span>
+              <span className="text-zinc-400 text-center font-mono">Sub-frame phoneme timecodes</span>
             </div>
 
-            {/* Row 6: Version history and rollbacks */}
+            {/* Row 6: Rich text editor */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Version history and rollbacks</span>
+              <span className="text-zinc-300 font-medium">Rich text formatting (B, I, U, H1, H2)</span>
               <div className="flex justify-center">
                 <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
                   <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
@@ -347,14 +347,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </div>
             </div>
 
-            {/* Row 7: Comments and review flows */}
+            {/* Row 7: Keyword biasing */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Comments and review flows</span>
-              <div className="flex justify-center">
-                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
-                </span>
-              </div>
+              <span className="text-zinc-300 font-medium">Keyword &amp; name biasing</span>
+              <span className="text-zinc-600 text-center font-mono">—</span>
               <div className="flex justify-center">
                 <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
                   <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
@@ -367,14 +363,10 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </div>
             </div>
 
-            {/* Row 8: Figma and Linear integrations */}
+            {/* Row 8: Local daemon */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Figma and Linear integrations</span>
-              <div className="flex justify-center">
-                <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
-                  <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
-                </span>
-              </div>
+              <span className="text-zinc-300 font-medium">Local daemon connectivity (port 8000)</span>
+              <span className="text-zinc-600 text-center font-mono">—</span>
               <div className="flex justify-center">
                 <span className="w-5 h-5 rounded-none bg-white flex items-center justify-center">
                   <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />
@@ -404,9 +396,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               </div>
             </div>
 
-            {/* Row 10: Custom data residency & compliance */}
+            {/* Row 10: Air-gapped deployment */}
             <div className="grid grid-cols-4 px-6 sm:px-8 py-4 border-b border-zinc-800/60 items-center text-xs">
-              <span className="text-zinc-300 font-medium">Custom data residency &amp; HIPAA</span>
+              <span className="text-zinc-300 font-medium">Air-gapped on-premise installation</span>
               <span className="text-zinc-600 text-center font-mono">—</span>
               <span className="text-zinc-600 text-center font-mono">—</span>
               <div className="flex justify-center">

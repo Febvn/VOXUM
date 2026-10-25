@@ -29,67 +29,67 @@ export interface HelpArticle {
 
 const DEFAULT_CATEGORIES: HelpCategory[] = [
   {
-    id: 'accounts',
+    id: 'media',
+    icon: <FileText className="w-4 h-4 text-zinc-300" />,
+    title: 'Audio & Video Pipeline',
+    description: 'MP3, WAV, MP4, WebM conversion and audio extraction.',
+    articleCount: 16
+  },
+  {
+    id: 'timestamps',
     icon: <Key className="w-4 h-4 text-zinc-300" />,
-    title: 'Accounts and access',
-    description: 'Sign in, SSO, roles and invitations.',
-    articleCount: 24
+    title: 'Timestamps & Formats',
+    description: '[MM:SS], seconds, minute blocks, and rich text editing.',
+    articleCount: 22
+  },
+  {
+    id: 'engine',
+    icon: <Plug className="w-4 h-4 text-zinc-300" />,
+    title: 'Local Engine & ASR',
+    description: 'Whistle daemon, CTranslate2 setup, and air-gapped runtimes.',
+    articleCount: 19
   },
   {
     id: 'billing',
     icon: <CreditCard className="w-4 h-4 text-zinc-300" />,
-    title: 'Billing and plans',
-    description: 'Invoices, seats, upgrades and refunds.',
-    articleCount: 18
-  },
-  {
-    id: 'integrations',
-    icon: <Plug className="w-4 h-4 text-zinc-300" />,
-    title: 'Integrations',
-    description: 'Warehouses, webhooks and the API.',
-    articleCount: 31
-  },
-  {
-    id: 'reports',
-    icon: <FileText className="w-4 h-4 text-zinc-300" />,
-    title: 'Reports and exports',
-    description: 'Scheduling, formats and delivery.',
-    articleCount: 27
+    title: 'Plans & Commercial Use',
+    description: 'Developer tiers, seat limits, and enterprise air-gapped licensing.',
+    articleCount: 14
   }
 ];
 
 const DEFAULT_ARTICLES: HelpArticle[] = [
   {
     id: 'art-1',
-    title: 'Why did my scheduled export arrive empty?',
-    views: '4.2k',
-    category: 'reports',
+    title: 'How does client-side video audio extraction work?',
+    views: '5.1k',
+    category: 'media',
     content:
-      'Scheduled exports only generate output when new audio transcriptions or telemetry events are recorded within the query time window. Check your trigger filter parameters in the settings panel.'
+      'VOXTUM decodes MP4, MOV, and WebM video files locally using the browser Web Audio API before dispatching raw 16kHz mono PCM to the speech model. Your visual video track never leaves your machine.'
   },
   {
     id: 'art-2',
-    title: 'Move a workspace to a different owner',
-    views: '3.1k',
-    category: 'accounts',
+    title: 'Switching between [MM:SS], seconds, and per-minute timestamps',
+    views: '3.8k',
+    category: 'timestamps',
     content:
-      'Organization owners can transfer workspace root privileges by visiting Organization Settings > Members > Transfer Ownership. The recipient must confirm via their verified corporate email.'
+      'Select any timestamp mode in the output toolbar above the transcription editor. The view updates instantly from precise word-level offset data without re-running inference.'
   },
   {
     id: 'art-3',
-    title: 'Set up SAML with your identity provider',
-    views: '2.8k',
-    category: 'accounts',
+    title: 'Connecting to a local air-gapped ASR daemon on port 8000',
+    views: '3.2k',
+    category: 'engine',
     content:
-      'VOXTUM supports Okta, Microsoft Entra ID, and Google Workspace via SAML 2.0. Export your metadata XML from your IdP dashboard and paste the ACS URL and Entity ID into Organization Settings.'
+      'Open Engine Configuration via the gear icon in the navigation bar. Set your Whistle daemon endpoint (default http://localhost:8000) to keep audio computation within your private subnet.'
   },
   {
     id: 'art-4',
-    title: 'Understand seat counts on the Pro plan',
-    views: '2.4k',
-    category: 'billing',
+    title: 'Exporting formatted transcripts to TXT and Markdown',
+    views: '2.9k',
+    category: 'timestamps',
     content:
-      'Pro plan seats are billed per active editor seat per month. Read-only viewers, API keys, and automated transcription agents do not count toward your monthly billed user limit.'
+      'Click Download .TXT in the header bar to export your transcript text buffer. Applied formatting like headings, bold, and list items is cleanly serialized into your file.'
   }
 ];
 
@@ -140,7 +140,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
             />
           </h2>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            Search the guides, or open a ticket and a person will reply. Median first
+            Search documentation, audio pipeline guides, and engine setup instructions. Median first
             response today is 11 minutes.
           </p>
         </div>
@@ -240,10 +240,10 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
             </div>
             <div>
               <div className="text-sm sm:text-base font-medium text-white tracking-tight">
-                Still stuck?
+                Need on-premise deployment or custom vocabulary?
               </div>
               <div className="text-xs text-zinc-400 mt-0.5 leading-snug">
-                Support is online now, 09:00 to 21:00 UTC on weekdays.
+                Connect directly with our speech engineering team for air-gapped installations.
               </div>
             </div>
           </div>
@@ -253,7 +253,7 @@ export const SupportSection: React.FC<SupportSectionProps> = ({
             onClick={handleContactClick}
             className="rounded-none bg-white hover:bg-zinc-200 text-zinc-950 font-medium text-xs sm:text-sm px-5 py-2.5 shadow-sm transition-colors active:scale-95 shrink-0 self-start sm:self-auto text-center"
           >
-            Contact support
+            Contact audio team
           </button>
         </div>
       </div>

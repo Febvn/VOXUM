@@ -18,13 +18,13 @@ export interface AboutSectionProps {
 
 const DEFAULT_TABS: AboutTabItem[] = [
   {
-    id: 'innovation',
-    label: 'Innovation',
+    id: 'inference',
+    label: 'Inference',
     heading: (
       <>
         <div className="mb-1">
           <ShinyText
-            text="Building the"
+            text="Local speech"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -33,7 +33,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
         <div>
           <ShinyText
-            text="future"
+            text="intelligence"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -42,7 +42,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
       </>
     ),
-    description: 'We leverage cutting-edge machine learning to solve complex problems.',
+    description: 'Quantized speech models run directly inside the browser or on your private daemon, eliminating third-party media transmission.',
     image: '/earth-night.png'
   },
   {
@@ -61,7 +61,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
         <div>
           <ShinyText
-            text="latency"
+            text="throughput"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -70,17 +70,17 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
       </>
     ),
-    description: 'Streaming inference engines deliver real-time audio transcriptions before speakers pause.',
+    description: 'Optimized INT8 neural decoders transcribe hour-long recordings in seconds, generating complete text before speakers finish.',
     image: '/earth-night.png'
   },
   {
-    id: 'transparency',
-    label: 'Transparency',
+    id: 'precision',
+    label: 'Precision',
     heading: (
       <>
         <div className="mb-1">
           <ShinyText
-            text="Auditable by"
+            text="Word-level"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -89,7 +89,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
         <div>
           <ShinyText
-            text="design"
+            text="timecodes"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -98,17 +98,17 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
       </>
     ),
-    description: 'Verifiable confidence metrics and deterministic model outputs ensure complete operational trust.',
+    description: 'Every token maps directly to audio timestamps. Toggle between plain text, seconds, or minute blocks without losing context.',
     image: '/earth-night.png'
   },
   {
-    id: 'impact',
-    label: 'Impact',
+    id: 'privacy',
+    label: 'Privacy',
     heading: (
       <>
         <div className="mb-1">
           <ShinyText
-            text="Scale without"
+            text="Air-gapped"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -117,7 +117,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
         <div>
           <ShinyText
-            text="friction"
+            text="readiness"
             speed={2.5}
             color="#d4d4d8"
             shineColor="#ffffff"
@@ -126,7 +126,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
         </div>
       </>
     ),
-    description: 'Empowering engineering organizations to automate routine controls and audio workflows seamlessly.',
+    description: 'Audio streams stay in volatile RAM and clear immediately after decoding. No external cloud retention and no training on customer files.',
     image: '/earth-night.png'
   }
 ];
@@ -134,7 +134,7 @@ const DEFAULT_TABS: AboutTabItem[] = [
 export const AboutSection: React.FC<AboutSectionProps> = ({
   id = 'about',
   tabs = DEFAULT_TABS,
-  defaultTab = 'innovation',
+  defaultTab = 'inference',
   className = ''
 }) => {
   const [activeTabId, setActiveTabId] = useState(defaultTab);

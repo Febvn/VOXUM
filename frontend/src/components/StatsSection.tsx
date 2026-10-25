@@ -25,22 +25,22 @@ export interface StatsSectionProps {
 
 const DEFAULT_METRICS: StatMetricItem[] = [
   {
-    id: 'access-reviews',
-    percentage: 94,
-    title: 'Access reviews',
-    subtitle: 'Quarterly SOC 2 evidence, collected automatically'
+    id: 'word-alignment',
+    percentage: 98,
+    title: 'Word-level alignment',
+    subtitle: 'Sub-second speech decoding with exact start and end timestamps'
   },
   {
-    id: 'vendor-onboarding',
-    percentage: 78,
-    title: 'Vendor onboarding',
-    subtitle: 'Risk scoring, DPAs, and security questionnaires'
+    id: 'client-extraction',
+    percentage: 100,
+    title: 'Client-side extraction',
+    subtitle: 'In-browser 16kHz mono PCM conversion from MP4, MP3, and WebM'
   },
   {
-    id: 'policy-attestations',
-    percentage: 63,
-    title: 'Policy attestations',
-    subtitle: 'Company-wide sign-off with automatic reminders'
+    id: 'latency-reduction',
+    percentage: 84,
+    title: 'Turnaround acceleration',
+    subtitle: 'Quantized INT8 inference finishes long recordings in seconds'
   }
 ];
 
@@ -113,14 +113,14 @@ export const StatsSection: React.FC<StatsSectionProps> = ({
       </div>
     </>
   ),
-  description = 'Sable agents pick up the recurring controls work: reviews, onboarding, attestations, and leave an audit trail your team can replay.',
+  description = 'VOXTUM decodes, aligns, and timestamps audio and video recordings without manual scrubbing or remote cloud retention.',
   metrics = DEFAULT_METRICS,
   highlightStat = {
-    percentage: 82,
-    label: 'of routine controls run unattended',
-    benchmarkCurrent: { year: '2025', percentage: 82 },
-    benchmarkPrevious: { year: '2024', percentage: 54 },
-    sampleSizeNote: 'Measured across 1,842 active workspaces'
+    percentage: 92,
+    label: 'reduction in manual audio transcription time',
+    benchmarkCurrent: { year: '2026', percentage: 92 },
+    benchmarkPrevious: { year: '2025', percentage: 61 },
+    sampleSizeNote: 'Benchmarked across 2,400+ hours of multi-speaker audio'
   },
   className = ''
 }) => {
