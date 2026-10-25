@@ -38,7 +38,7 @@ export function App() {
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -287,11 +287,11 @@ export function App() {
           onOpenHistory={() => setIsHistoryOpen(true)}
           onOpenPricing={() => setIsPricingOpen(true)}
           onOpenSignIn={() => {
-            setAuthMode('signin');
+            setAuthMode('login');
             setIsAuthOpen(true);
           }}
           onOpenSignUp={() => {
-            setAuthMode('signup');
+            setAuthMode('register');
             setIsAuthOpen(true);
           }}
           onSignOut={handleSignOut}

@@ -6,3 +6,4 @@ export interface AuthUser {
   provider: 'google' | 'voxtum';
   createdAt: string;
 }
+

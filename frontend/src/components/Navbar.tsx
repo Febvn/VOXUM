@@ -22,6 +22,7 @@ interface NavbarProps {
   onOpenSettings?: () => void;
   onOpenHistory?: () => void;
   onOpenPricing?: () => void;
+  onOpenLogin?: () => void;
   onOpenSignIn?: () => void;
   onOpenSignUp?: () => void;
   onSignOut?: () => void;
@@ -57,13 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSettings,
   onOpenHistory,
   onOpenPricing,
+  onOpenLogin,
   onOpenSignIn,
-  onOpenSignUp,
   onSignOut,
   user = null,
   currentPlan = 'pro',
   brandName = 'VOXTUM',
 }) => {
+  const handleLoginClick = onOpenLogin || onOpenSignIn;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -229,25 +231,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
-                <button
-                  onClick={onOpenSignIn}
-                  type="button"
-                  className="text-sm font-medium text-zinc-300 hover:text-white transition-colors px-2 py-1 rounded-none"
-                >
-                  Sign in
-                </button>
-                <button
-                  onClick={onOpenSignUp}
-                  type="button"
-                  className="bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs px-3.5 py-1.5 rounded-none transition-colors duration-150 shadow-sm active:scale-95 uppercase font-mono"
-                >
-                  Create Account
-                </button>
-              </div>
+              <button
+                onClick={handleLoginClick}
+                type="button"
+                className="bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs px-4 py-1.5 rounded-none transition-colors duration-150 shadow-sm active:scale-95 uppercase font-mono tracking-wider"
+              >
+                Login
+              </button>
             )}
 
-            {/* Burger Button directly next to Sign up / User */}
+            {/* Burger Button directly next to Login / User */}
             <button
               onClick={() => setIsSidebarOpen(true)}
               type="button"
@@ -259,7 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Mobile Actions: User Avatar or Sign In + Burger Button */}
+          {/* Mobile Actions: User Avatar or Login + Burger Button */}
           <div className="flex sm:hidden items-center gap-2">
             {user ? (
               <button
@@ -274,11 +267,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             ) : (
               <button
-                onClick={onOpenSignIn}
+                onClick={handleLoginClick}
                 type="button"
-                className="bg-white text-zinc-950 font-bold text-xs px-2.5 py-1 rounded-none font-mono uppercase"
+                className="bg-white text-zinc-950 font-bold text-xs px-3 py-1 rounded-none font-mono uppercase tracking-wider"
               >
-                Sign In
+                Login
               </button>
             )}
 
@@ -354,11 +347,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       type="button"
                       onClick={() => {
                         setIsSidebarOpen(false);
-                        onOpenSignIn?.();
+                        handleLoginClick?.();
                       }}
-                      className="w-full py-2 bg-white text-black font-bold text-xs uppercase tracking-wider text-center"
+                      className="w-full py-2 bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider text-center rounded-none font-mono transition-colors"
                     >
-                      Sign In / Register
+                      Login / Register
                     </button>
                   </div>
                 )}
