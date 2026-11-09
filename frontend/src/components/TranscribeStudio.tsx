@@ -74,7 +74,12 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       }
 
       const activeApiKey = (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key')) || '').trim();
-      const activeBackendUrl = (backendUrl || (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) || 'http://localhost:8000').trim();
+      const activeBackendUrl = (
+        backendUrl ||
+        (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) ||
+        (import.meta.env.VITE_BACKEND_URL as string) ||
+        'http://localhost:8000'
+      ).trim();
 
       let textOutput = '';
       let wordsOutput: WordTimestamp[] = [];

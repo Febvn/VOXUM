@@ -20,7 +20,9 @@ export function App() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('voxtum_gemini_key') || '');
-  const [backendUrl, setBackendUrl] = useState<string>(() => localStorage.getItem('voxtum_backend_url') || 'http://localhost:8000');
+  const [backendUrl, setBackendUrl] = useState<string>(
+    () => localStorage.getItem('voxtum_backend_url') || (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:8000'
+  );
   const [activePlan, setActivePlan] = useState<string>('free');
   const [transcriptText, setTranscriptText] = useState<string>('');
   const [transcriptFileName, setTranscriptFileName] = useState<string>('voxtum_transcript.txt');
