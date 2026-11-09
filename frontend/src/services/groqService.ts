@@ -9,6 +9,16 @@ export const DEFAULT_GROQ_KEY =
   (import.meta.env.VITE_GROQ_API_KEY as string) ||
   BUILTIN_KEY;
 
+function formatMMSSTime(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function formatTimeRange(start: number, end: number): string {
+  return `[${formatMMSSTime(start)} - ${formatMMSSTime(Math.max(start + 1, end || start + 2))}]`;
+}
+
 /**
  * Encodes Float32 mono audio buffer into 16-bit PCM WAV Blob
  */
@@ -127,8 +137,123 @@ async function callGroqWhisperChunk(
 }
 
 /**
- * Transcribe media with Groq Whisper Large V3 Turbo.
- * Automatically slices files >24MB into 10-minute WAV chunks to bypass Groq's 25MB limit.
+ * Membedakan Speaker 1, Speaker 2, dst. menggunakan Groq LLM
+ * berdasarkan giliran bicara, tanya-jawab, dan pergantian subjek percakapan.
+ */
+async function diarizeConversation(
+  segments: { start: number; end: number; text: string; speaker?: string }[],
+  apiKey: string,
+  onProgress?: (msg: string) => void
+): Promise<{ text: string; segments: { start: number; end: number; text: string; speaker?: string }[] }> {
+  if (segments.length === 0) {
+    return { text: '', segments: [] };
+  }
+
+  const segmentLines = segments
+    .slice(0, 100) // Batasi 100 segmen per batch analisis percakapan
+    .map((s, idx) => `${idx + 1}. ${formatTimeRange(s.start, s.end)} ${s.text.trim()}`)
+    .join('\n');
+
+  try {
+    onProgress?.('Menganalisis jenis suara & giliran bicara (Speaker 1, Speaker 2)...');
+
+    const prompt = `Anda adalah sistem audio intelligence profesional. Tugas Anda adalah membedakan pembicara (Speaker 1, Speaker 2, dst) pada setiap baris transkripsi berikut berdasarkan giliran percakapan, tanya-jawab, salam-balasan, dan pergantian subjek/topik.
+
+Daftar Segmen:
+${segmentLines}
+
+Petunjuk Format Keluaran:
+Keluarkan setiap baris persis seperti contoh:
+[MM:SS - MM:SS] Speaker X: <teks percakapan asli>
+
+Aturan Penting:
+1. Setiap baris HARUS diawali rentang waktu [MM:SS - MM:SS] dan label pembicara (misal "Speaker 1:" atau "Speaker 2:").
+2. Jangan merubah teks kalimat asli.
+3. HANYA keluarkan hasil percakapan tanpa kalimat pengantar atau penutup.`;
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey.trim()}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-oss-20b',
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.1
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const content = (data.choices?.[0]?.message?.content || '').trim();
+      const lines = content.split('\n').map((l: string) => l.trim()).filter(Boolean);
+
+      if (lines.length > 0) {
+        const updatedSegments: { start: number; end: number; text: string; speaker?: string }[] = [];
+        lines.forEach((line: string, i: number) => {
+          const match = line.match(/^\[(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\]\s*(Speaker\s*\d+):?\s*(.*)$/i);
+          if (match) {
+            const speaker = match[3];
+            const textContent = match[4];
+            const orig = segments[i] || segments[segments.length - 1];
+            updatedSegments.push({
+              start: orig.start,
+              end: orig.end,
+              text: textContent,
+              speaker: speaker
+            });
+          } else if (segments[i]) {
+            updatedSegments.push({
+              ...segments[i],
+              speaker: 'Speaker 1'
+            });
+          }
+        });
+
+        if (updatedSegments.length > 0) {
+          return {
+            text: lines.join('\n'),
+            segments: updatedSegments
+          };
+        }
+      }
+    }
+  } catch (llmErr) {
+    console.warn('Groq LLM Diarization fallback ke analisis jeda waktu bicara:', llmErr);
+  }
+
+  // Fallback heuristik: analisis jeda waktu (>1.2s) dan tanda tanya (?)
+  let currentSpeaker = 1;
+  const fallbackSegments = segments.map((s, idx) => {
+    if (idx > 0) {
+      const prev = segments[idx - 1];
+      const gap = s.start - (prev.end || prev.start);
+      const prevAsked = /[?!]$/.test(prev.text.trim());
+      if (gap > 1.2 || prevAsked) {
+        currentSpeaker = currentSpeaker === 1 ? 2 : 1;
+      }
+    }
+    return {
+      ...s,
+      speaker: `Speaker ${currentSpeaker}`
+    };
+  });
+
+  const formattedLines = fallbackSegments.map((s) => {
+    return `${formatTimeRange(s.start, s.end)} ${s.speaker}: ${s.text.trim()}`;
+  });
+
+  return {
+    text: formattedLines.join('\n'),
+    segments: fallbackSegments
+  };
+}
+
+/**
+ * Transcribe media with Groq Whisper Large V3 Turbo with automated Speaker Diarization.
  */
 export async function transcribeWithGroq(
   file: File,
@@ -139,7 +264,7 @@ export async function transcribeWithGroq(
 ): Promise<ProcessResponse> {
   const activeKey = (apiKey || DEFAULT_GROQ_KEY).trim();
   if (!activeKey) {
-    throw new Error('Groq API Key belum diatur. Silakan atur di menu Pengaturan.');
+    throw new Error('Groq API Key belum diatur.');
   }
 
   const isSmallAudio =
@@ -147,16 +272,16 @@ export async function transcribeWithGroq(
     !file.type.startsWith('video/') &&
     !/\.(mp4|mov|webm|mkv|avi)$/i.test(file.name);
 
-  let fullText = '';
+  let rawFullText = '';
   const words: WordTimestamp[] = [];
-  const segments: { start: number; end: number; text: string }[] = [];
+  const rawSegments: { start: number; end: number; text: string; speaker?: string }[] = [];
 
   if (isSmallAudio) {
     // 1. Berkas audio <= 24 MB: kirim langsung dalam 1 panggilan (1-2 detik)
     onProgress?.('Mengirim berkas ke Groq Whisper Large V3 Turbo...', 30);
     const result = await callGroqWhisperChunk(file, file.name, activeKey, language);
 
-    fullText = (result.text || '').trim();
+    rawFullText = (result.text || '').trim();
 
     if (Array.isArray(result.words)) {
       result.words.forEach((w: any) => {
@@ -171,7 +296,7 @@ export async function transcribeWithGroq(
 
     if (Array.isArray(result.segments)) {
       result.segments.forEach((seg: any) => {
-        segments.push({
+        rawSegments.push({
           start: Number(seg.start.toFixed(2)),
           end: Number(seg.end.toFixed(2)),
           text: (seg.text || '').trim()
@@ -198,9 +323,9 @@ export async function transcribeWithGroq(
       const chunkBlob = encodeWav(chunkSamples, sampleRate);
       const timeOffset = c * chunkDurationSeconds;
 
-      const progressPct = 25 + Math.round(((c + 1) / totalChunks) * 65);
+      const progressPct = 25 + Math.round(((c + 1) / totalChunks) * 55);
       onProgress?.(
-        `Mentranskripsi bagian ${c + 1} dari ${totalChunks} (~${Math.round(chunkSamples.length / sampleRate)} detik)...`,
+        `Mentranskripsi bagian ${c + 1} dari ${totalChunks}...`,
         progressPct
       );
 
@@ -213,7 +338,7 @@ export async function transcribeWithGroq(
 
       const chunkText = (chunkResult.text || '').trim();
       if (chunkText) {
-        fullText = fullText ? `${fullText} ${chunkText}` : chunkText;
+        rawFullText = rawFullText ? `${rawFullText} ${chunkText}` : chunkText;
       }
 
       if (Array.isArray(chunkResult.words)) {
@@ -229,7 +354,7 @@ export async function transcribeWithGroq(
 
       if (Array.isArray(chunkResult.segments)) {
         chunkResult.segments.forEach((seg: any) => {
-          segments.push({
+          rawSegments.push({
             start: Number((seg.start + timeOffset).toFixed(2)),
             end: Number((seg.end + timeOffset).toFixed(2)),
             text: (seg.text || '').trim()
@@ -240,11 +365,11 @@ export async function transcribeWithGroq(
   }
 
   // Jika segments kosong tetapi words ada, susun segments dari words
-  if (segments.length === 0 && words.length > 0) {
+  if (rawSegments.length === 0 && words.length > 0) {
     const chunkSize = 15;
     for (let i = 0; i < words.length; i += chunkSize) {
       const slice = words.slice(i, i + chunkSize);
-      segments.push({
+      rawSegments.push({
         start: slice[0].start,
         end: slice[slice.length - 1].end,
         text: slice.map((s) => s.word).join(' ')
@@ -252,41 +377,48 @@ export async function transcribeWithGroq(
     }
   }
 
-  const firstFewLines = fullText.slice(0, 300);
+  // 3. DIARIZATION PASS: Tambahkan penanda [MM:SS - MM:SS] Speaker 1, Speaker 2
+  onProgress?.('Membedakan penutur (Speaker 1, Speaker 2)...', 85);
+  const diarized = await diarizeConversation(rawSegments, activeKey, (msg) => onProgress?.(msg, 90));
+
+  const finalFormattedText = diarized.text || rawFullText;
+  const finalSegments = diarized.segments.length > 0 ? diarized.segments : rawSegments;
+
+  const firstFewLines = finalFormattedText.slice(0, 300);
   return {
     status: 'success',
     filename: file.name,
     template,
     transcription: {
-      text: fullText,
+      text: finalFormattedText,
       language: language === 'auto' ? 'id' : language,
       latency_ms: 120,
       tokens_per_sec: 1850,
       words,
-      segments,
-      engine: 'groq-whisper-large-v3-turbo'
+      segments: finalSegments,
+      engine: 'groq-whisper-large-v3-turbo-diarized'
     },
     meeting_notes: {
       title: `Transkripsi: ${file.name.replace(/\.[^/.]+$/, '')}`,
       executive_summary: firstFewLines
-        ? `Transkripsi berhasil diproses menggunakan Groq Whisper Large V3 Turbo.\n\n"${firstFewLines}..."`
+        ? `Transkripsi percakapan berhasil diproses dengan deteksi pembicara (Speaker Diarization).\n\n"${firstFewLines}..."`
         : 'Transkripsi audio berhasil diproses.',
       key_topics: [
         {
-          title: 'Hasil Transkripsi Groq Whisper LPU',
-          summary: 'Diproses dengan model resmi Whisper Large V3 Turbo berkecepatan tinggi.'
+          title: 'Deteksi Pembicara (Diarization)',
+          summary: 'Percakapan dikelompokkan berdasarkan giliran bicara (Speaker 1, Speaker 2, dst) dengan rentang waktu presisi.'
         }
       ],
       action_items: [
         {
-          task: 'Tinjau dan simpan berkas transkripsi',
+          task: 'Tinjau giliran bicara dan edit teks jika diperlukan',
           assignee: 'Pengguna',
           deadline: 'Hari Ini',
           priority: 'High'
         }
       ],
-      decisions: ['Memproses transkripsi secara instan menggunakan Groq Whisper Cloud LPU.'],
-      sentiment: 'Sangat Cepat'
+      decisions: ['Memproses transkripsi secara instan dengan label pembicara otomatis.'],
+      sentiment: 'Sangat Jelas & Terstruktur'
     }
   };
 }

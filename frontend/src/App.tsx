@@ -40,14 +40,14 @@ export function App() {
   const [transcriptText, setTranscriptText] = useState<string>('');
   const [transcriptFileName, setTranscriptFileName] = useState<string>('voxtum_transcript.txt');
   const [transcriptWords, setTranscriptWords] = useState<WordTimestamp[]>([]);
-  const [transcriptSegments, setTranscriptSegments] = useState<{ start: number; end: number; text: string }[]>([]);
+  const [transcriptSegments, setTranscriptSegments] = useState<{ start: number; end: number; text: string; speaker?: string }[]>([]);
   const gridSpacing = useGridSpacing();
 
   const handleTranscriptionComplete = (
     text: string,
     fileName?: string,
     words?: WordTimestamp[],
-    segments?: { start: number; end: number; text: string }[]
+    segments?: { start: number; end: number; text: string; speaker?: string }[]
   ) => {
     setTranscriptText(text);
     if (fileName) setTranscriptFileName(fileName);

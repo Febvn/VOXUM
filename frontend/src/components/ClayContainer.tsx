@@ -25,7 +25,7 @@ export interface ClayContainerProps {
   onTranscriptChange?: (text: string) => void;
   fileName?: string;
   words?: WordTimestamp[];
-  segments?: { start: number; end: number; text: string }[];
+  segments?: { start: number; end: number; text: string; speaker?: string }[];
 }
 
 function formatSecondsToMMSS(sec: number): string {
@@ -37,23 +37,37 @@ function formatSecondsToMMSS(sec: number): string {
 export function formatTranscriptWithTimestamps(
   mode: TimestampMode,
   rawText: string,
-  segments?: { start: number; end: number; text: string }[],
+  segments?: { start: number; end: number; text: string; speaker?: string }[],
   words?: WordTimestamp[]
 ): string {
   if (mode === 'none') {
-    return rawText;
+    return rawText
+      .split('\n')
+      .map((line) => line.replace(/^\[\d{2}:\d{2}(\s*-\s*\d{2}:\d{2})?\]\s*(Speaker\s*\d+:)?\s*/i, '').trim())
+      .filter(Boolean)
+      .join('\n');
   }
 
-  // 1. Segments dari Whistle ASR
+  // 1. Segments dari Groq Whisper ASR dengan Speaker Diarization
   if (segments && segments.length > 0) {
     if (mode === 'mmss') {
       return segments
-        .map((s) => `[${formatSecondsToMMSS(s.start)}] ${s.text.trim()}`)
+        .map((s) => {
+          const startStr = formatSecondsToMMSS(s.start);
+          const endStr = formatSecondsToMMSS(Math.max(s.start + 1, s.end || (s.start + 2)));
+          const speakerStr = s.speaker ? `${s.speaker}: ` : '';
+          const cleanText = s.text.replace(/^\[\d{2}:\d{2}(\s*-\s*\d{2}:\d{2})?\]\s*(Speaker\s*\d+:)?\s*/i, '').trim();
+          return `[${startStr} - ${endStr}] ${speakerStr}${cleanText}`;
+        })
         .join('\n');
     }
     if (mode === 'seconds') {
       return segments
-        .map((s) => `[${Math.floor(s.start)}s] ${s.text.trim()}`)
+        .map((s) => {
+          const speakerStr = s.speaker ? `${s.speaker}: ` : '';
+          const cleanText = s.text.replace(/^\[\d{2}:\d{2}(\s*-\s*\d{2}:\d{2})?\]\s*(Speaker\s*\d+:)?\s*/i, '').trim();
+          return `[${Math.floor(s.start)}s - ${Math.floor(s.end || s.start + 2)}s] ${speakerStr}${cleanText}`;
+        })
         .join('\n');
     }
     if (mode === 'minute') {
@@ -61,14 +75,16 @@ export function formatTranscriptWithTimestamps(
       segments.forEach((s) => {
         const bucketIdx = Math.floor(s.start / 60);
         if (!buckets[bucketIdx]) buckets[bucketIdx] = [];
-        buckets[bucketIdx].push(s.text.trim());
+        const speakerStr = s.speaker ? `${s.speaker}: ` : '';
+        const cleanText = s.text.replace(/^\[\d{2}:\d{2}(\s*-\s*\d{2}:\d{2})?\]\s*(Speaker\s*\d+:)?\s*/i, '').trim();
+        buckets[bucketIdx].push(`${speakerStr}${cleanText}`);
       });
       return Object.entries(buckets)
         .map(([idxStr, texts]) => {
           const idx = parseInt(idxStr, 10);
           const startMin = formatSecondsToMMSS(idx * 60);
           const endMin = formatSecondsToMMSS((idx + 1) * 60);
-          return `[${startMin} - ${endMin}]\n${texts.join(' ')}`;
+          return `[${startMin} - ${endMin}]\n${texts.join('\n')}`;
         })
         .join('\n\n');
     }
@@ -493,9 +509,9 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
                           ? 'border-white bg-white text-black font-semibold'
                           : 'border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white'
                       }`}
-                      title="Minutes:Seconds format [00:01]"
+                      title="Minutes:Seconds format [00:34 - 00:36] Speaker 1"
                     >
-                      [MM:SS]
+                      [MM:SS] Speaker
                     </button>
                     <button
                       type="button"

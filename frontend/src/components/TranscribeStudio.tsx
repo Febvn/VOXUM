@@ -23,7 +23,7 @@ export interface TranscribeStudioProps {
     text: string,
     fileName?: string,
     words?: WordTimestamp[],
-    segments?: { start: number; end: number; text: string }[]
+    segments?: { start: number; end: number; text: string; speaker?: string }[]
   ) => void;
 }
 
@@ -87,7 +87,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
 
       let textOutput = '';
       let wordsOutput: WordTimestamp[] = [];
-      let segmentsOutput: { start: number; end: number; text: string }[] = [];
+      let segmentsOutput: { start: number; end: number; text: string; speaker?: string }[] = [];
 
       // 1. PRIORITAS UTAMA: Groq Whisper Large V3 Turbo (~3-5 detik selesai, 100% gratis)
       if (activeGroqKey) {
