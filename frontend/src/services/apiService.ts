@@ -311,17 +311,134 @@ export function generateDemoResponse(template: MeetingTemplate, language: string
 }
 
 /**
+ * Upload audio file ke Google Gemini File API (Mendukung file besar hingga 2GB, misal file 50MB+)
+ */
+async function uploadToGeminiFileApi(
+  file: File,
+  geminiApiKey: string,
+  onStatusUpdate?: (status: string) => void
+): Promise<{ fileUri: string; mimeType: string }> {
+  let mimeType = file.type;
+  if (!mimeType) {
+    if (file.name.endsWith('.mp3')) mimeType = 'audio/mp3';
+    else if (file.name.endsWith('.wav')) mimeType = 'audio/wav';
+    else if (file.name.endsWith('.m4a')) mimeType = 'audio/m4a';
+    else if (file.name.endsWith('.aac')) mimeType = 'audio/aac';
+    else if (file.name.endsWith('.ogg')) mimeType = 'audio/ogg';
+    else if (file.name.endsWith('.flac')) mimeType = 'audio/flac';
+    else mimeType = 'audio/mp3';
+  }
+
+  onStatusUpdate?.(`Menginisialisasi unggahan cloud (${(file.size / (1024 * 1024)).toFixed(1)} MB)...`);
+
+  const initUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${geminiApiKey}`;
+  const initRes = await fetch(initUrl, {
+    method: 'POST',
+    headers: {
+      'X-Goog-Upload-Protocol': 'resumable',
+      'X-Goog-Upload-Command': 'start',
+      'X-Goog-Upload-Header-Content-Length': file.size.toString(),
+      'X-Goog-Upload-Header-Content-Type': mimeType,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      file: {
+        display_name: file.name
+      }
+    })
+  });
+
+  if (!initRes.ok) {
+    const errorText = await initRes.text();
+    throw new Error(`Gemini File API initialization failed (${initRes.status}): ${errorText}`);
+  }
+
+  const uploadUrl = initRes.headers.get('x-goog-upload-url') || initRes.headers.get('Location');
+  if (!uploadUrl) {
+    throw new Error('Gemini File API did not return an upload URL.');
+  }
+
+  onStatusUpdate?.(`Mengunggah file audio (${(file.size / (1024 * 1024)).toFixed(1)} MB) ke Google AI Cloud...`);
+
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Length': file.size.toString(),
+      'X-Goog-Upload-Offset': '0',
+      'X-Goog-Upload-Command': 'upload, finalize'
+    },
+    body: file
+  });
+
+  if (!uploadRes.ok) {
+    const errorText = await uploadRes.text();
+    throw new Error(`Gemini File API upload failed (${uploadRes.status}): ${errorText}`);
+  }
+
+  const uploadData = await uploadRes.json();
+  const fileInfo = uploadData.file;
+  if (!fileInfo || !fileInfo.uri) {
+    throw new Error('Gemini File API did not return a valid file URI.');
+  }
+
+  onStatusUpdate?.('Audio berhasil diunggah. Menyiapkan transkripsi AI...');
+
+  let state = fileInfo.state;
+  let attempts = 0;
+  while (state === 'PROCESSING' && attempts < 30) {
+    await new Promise((r) => setTimeout(r, 1500));
+    const checkRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/${fileInfo.name}?key=${geminiApiKey}`
+    );
+    if (checkRes.ok) {
+      const checkData = await checkRes.json();
+      state = checkData.state;
+    }
+    attempts++;
+  }
+
+  return {
+    fileUri: fileInfo.uri,
+    mimeType: fileInfo.mimeType || mimeType
+  };
+}
+
+/**
  * Pemrosesan Audio via Gemini API Langsung dari Browser (Zero Timeout / Works 100% on Vercel)
+ * Mendukung audio inline (<20MB) maupun unggahan File API (>20MB seperti file 50MB+)
  */
 export async function processAudioWithGeminiDirect(
   file: File,
   geminiApiKey: string,
   language: string = 'auto',
   template: MeetingTemplate = 'general',
-  keywords?: string
+  keywords?: string,
+  onStatusUpdate?: (status: string) => void
 ): Promise<ProcessResponse> {
-  const base64Audio = await fileToBase64(file);
-  const mimeType = file.type || 'audio/wav';
+  const mimeType = file.type || (file.name.endsWith('.mp3') ? 'audio/mp3' : 'audio/wav');
+  const isLargeFile = file.size > 20 * 1024 * 1024; // > 20 MB
+
+  let audioPart: any;
+  if (isLargeFile) {
+    // Gunakan Google File API untuk file di atas 20MB
+    const fileData = await uploadToGeminiFileApi(file, geminiApiKey, onStatusUpdate);
+    audioPart = {
+      fileData: {
+        mimeType: fileData.mimeType,
+        fileUri: fileData.fileUri
+      }
+    };
+  } else {
+    // Gunakan inline base64 untuk file kecil
+    onStatusUpdate?.('Menyiapkan buffer audio...');
+    const base64Audio = await fileToBase64(file);
+    audioPart = {
+      inlineData: {
+        mimeType: mimeType,
+        data: base64Audio
+      }
+    };
+  }
 
   const templatePrompts: Record<MeetingTemplate, string> = {
     general: 'Formal meeting notes format: executive summary, action items, discussion topics, and decisions.',
@@ -339,20 +456,23 @@ export async function processAudioWithGeminiDirect(
       : `Use language ${language}.`;
   const kwInstruction = keywords ? `Pay special attention to these terms/names: ${keywords}.` : '';
 
-  const prompt = `You are a premier ASR and executive synthesis AI engine.
-1. Transcribe the attached audio accurately word-by-word.
-2. Analyze the audio content and generate structured meeting notes.
+  const prompt = `You are a premier speech recognition (ASR) and executive meeting analyst engine.
+Task:
+1. Transcribe the entire attached audio completely, accurately, and verbatim. Do not truncate, summarize, or skip any spoken words in the transcript text.
+2. Group the transcript into chronological speech segments with timestamps.
+3. Analyze the discussion content and generate structured executive meeting notes.
+
 ${langText}
 ${kwInstruction}
 Template: ${templateGuide}
 
-Output ONLY valid JSON without markdown wrapping or commentary:
+Output ONLY valid JSON with this exact schema (no markdown wrapping, no commentary outside JSON):
 {
   "transcription": {
-    "text": "Full audio transcript",
+    "text": "Full verbatim transcript of the entire audio without omitting any part",
     "language": "${language}",
-    "words": [
-      { "word": "word1", "start": 0.0, "end": 0.3, "probability": 0.98 }
+    "segments": [
+      { "start": 0.0, "end": 15.0, "text": "Segment transcript..." }
     ]
   },
   "meeting_notes": {
@@ -369,6 +489,8 @@ Output ONLY valid JSON without markdown wrapping or commentary:
   }
 }`;
 
+  onStatusUpdate?.('Memproses transkripsi & sintesis notula via Gemini Flash...');
+
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
 
   const res = await fetch(url, {
@@ -379,17 +501,14 @@ Output ONLY valid JSON without markdown wrapping or commentary:
         {
           parts: [
             { text: prompt },
-            {
-              inlineData: {
-                mimeType: mimeType,
-                data: base64Audio
-              }
-            }
+            audioPart
           ]
         }
       ],
       generationConfig: {
-        responseMimeType: 'application/json'
+        responseMimeType: 'application/json',
+        maxOutputTokens: 8192,
+        temperature: 0.2
       }
     })
   });
@@ -405,19 +524,52 @@ Output ONLY valid JSON without markdown wrapping or commentary:
     throw new Error('No JSON output received from Gemini API.');
   }
 
-  const parsed = JSON.parse(rawJson);
+  // Bersihkan markdown fences jika ada
+  const cleanJson = rawJson.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  const parsed = JSON.parse(cleanJson);
+
+  const transcriptText = parsed.transcription?.text || '';
+  const segments = parsed.transcription?.segments || [];
+
+  // Generate word timestamps dari segments atau kalimat
+  const words: WordTimestamp[] = [];
+  if (segments && segments.length > 0) {
+    segments.forEach((seg: any) => {
+      const segWords = (seg.text || '').trim().split(/\s+/).filter(Boolean);
+      const segDuration = Math.max(0.5, (seg.end || 0) - (seg.start || 0));
+      const wordDuration = segDuration / Math.max(1, segWords.length);
+      segWords.forEach((w: string, idx: number) => {
+        words.push({
+          word: w,
+          start: Number(((seg.start || 0) + idx * wordDuration).toFixed(2)),
+          end: Number(((seg.start || 0) + (idx + 1) * wordDuration).toFixed(2)),
+          probability: 0.98
+        });
+      });
+    });
+  } else if (transcriptText) {
+    transcriptText.split(/\s+/).filter(Boolean).forEach((w: string, idx: number) => {
+      words.push({
+        word: w,
+        start: Number((idx * 0.35).toFixed(2)),
+        end: Number(((idx + 1) * 0.35).toFixed(2)),
+        probability: 0.98
+      });
+    });
+  }
 
   return {
     status: 'success',
     filename: file.name,
     template,
     transcription: {
-      text: parsed.transcription?.text || '',
+      text: transcriptText,
       language: parsed.transcription?.language || language,
       latency_ms: 320,
       tokens_per_sec: 1319,
-      words: parsed.transcription?.words || [],
-      engine: 'gemini-flash-multimodal'
+      words,
+      segments,
+      engine: 'gemini-1.5-flash-multimodal'
     },
     meeting_notes: parsed.meeting_notes
   };

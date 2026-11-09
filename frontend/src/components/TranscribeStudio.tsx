@@ -1,16 +1,21 @@
 import React, { useState, useRef } from 'react';
 import {
   CloudUpload,
-  RefreshCw
+  RefreshCw,
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import type { MeetingTemplate, ProcessResponse, WordTimestamp } from '../types';
-import { generateDemoResponse } from '../services/apiService';
+import { generateDemoResponse, processAudioWithGeminiDirect } from '../services/apiService';
 import { convertMediaToWav } from '../utils/mediaConverter';
 import { GridScan } from './react-bits';
 
 export interface TranscribeStudioProps {
   id?: string;
   className?: string;
+  apiKey?: string;
+  backendUrl?: string;
+  onOpenSettings?: () => void;
   onTranscriptionComplete?: (
     text: string,
     fileName?: string,
@@ -22,6 +27,9 @@ export interface TranscribeStudioProps {
 export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   id = 'studio',
   className = '',
+  apiKey,
+  backendUrl,
+  onOpenSettings,
   onTranscriptionComplete
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -33,73 +41,102 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   const [keywords] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState<number>(0);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleFileSelect = async (file: File) => {
     if (isProcessing) return;
     setIsProcessing(true);
+    setErrorMessage(null);
     setProgress(5);
+    setStatusMessage('Memeriksa berkas media...');
 
     let progressInterval: any = setInterval(() => {
       setProgress((prev) => {
         if (prev < 30) return prev + 3;
         if (prev < 65) return prev + 2;
-        if (prev < 92) return Number((prev + 0.6).toFixed(1));
+        if (prev < 90) return Number((prev + 0.4).toFixed(1));
         return prev;
       });
-    }, 180);
+    }, 200);
 
     try {
       let fileToUpload: File = file;
       let targetFileName = file.name;
 
       try {
-        const conv = await convertMediaToWav(file);
+        const conv = await convertMediaToWav(file, (msg) => setStatusMessage(msg));
         fileToUpload = conv.wavFile;
         targetFileName = conv.originalName || file.name;
-        setProgress((prev) => Math.max(prev, 35));
+        setProgress((prev) => Math.max(prev, 25));
       } catch (convErr) {
-        console.warn('Conversion error, fallback to direct upload:', convErr);
+        console.warn('Media conversion bypass/fallback:', convErr);
       }
 
-      setProgress((prev) => Math.max(prev, 50));
-
-      const formData = new FormData();
-      formData.append('file', fileToUpload);
-      formData.append('language', language);
-      if (keywords) formData.append('keywords', keywords);
-
-      const configuredBackendUrl =
-        (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) ||
-        'http://localhost:8000';
-      const cleanBaseUrl = configuredBackendUrl.replace(/\/+$/, '');
+      const activeApiKey = (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key')) || '').trim();
+      const activeBackendUrl = (backendUrl || (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) || 'http://localhost:8000').trim();
 
       let textOutput = '';
       let wordsOutput: WordTimestamp[] = [];
       let segmentsOutput: { start: number; end: number; text: string }[] = [];
-      try {
+
+      // 1. Prioritaskan Google Gemini API Direct jika API Key disetel
+      if (activeApiKey) {
+        setStatusMessage('Menghubungkan ke Google Gemini Multimodal Studio...');
+        try {
+          const directRes = await processAudioWithGeminiDirect(
+            fileToUpload,
+            activeApiKey,
+            language,
+            template,
+            keywords,
+            (msg) => setStatusMessage(msg)
+          );
+          textOutput = directRes.transcription?.text || '';
+          wordsOutput = directRes.transcription?.words || [];
+          segmentsOutput = directRes.transcription?.segments || [];
+        } catch (geminiErr: any) {
+          console.error('Gemini direct processing failed:', geminiErr);
+          throw new Error(`Gemini API: ${geminiErr.message || String(geminiErr)}`);
+        }
+      } else {
+        // 2. Fallback ke Local Whistle Backend
+        const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const isLocalhostBackend = activeBackendUrl.startsWith('http://localhost') || activeBackendUrl.startsWith('http://127.0.0.1');
+
+        if (isHttps && isLocalhostBackend) {
+          throw new Error(
+            'Website online (HTTPS) memblokir koneksi ke http://localhost (proteksi Mixed-Content browser). Silakan masukkan Google Gemini API Key Anda di Pengaturan untuk transkripsi langsung dari browser.'
+          );
+        }
+
+        setStatusMessage('Mengirim ke Whistle ASR Engine...');
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+        formData.append('language', language);
+        if (keywords) formData.append('keywords', keywords);
+
+        const cleanBaseUrl = activeBackendUrl.replace(/\/+$/, '');
         const response = await fetch(`${cleanBaseUrl}/api/process`, {
           method: 'POST',
           body: formData
         });
 
         if (!response.ok) {
-          throw new Error(`Server returned ${response.status}`);
+          const errText = await response.text();
+          throw new Error(`Server ${response.status}: ${errText || 'Koneksi backend gagal'}`);
         }
 
         const data: ProcessResponse = await response.json();
         textOutput = data.transcription?.text || '';
         wordsOutput = data.transcription?.words || [];
         segmentsOutput = data.transcription?.segments || [];
-      } catch (err) {
-        console.warn('Backend call failed, using high-precision fallback output:', err);
-        const fallback = generateDemoResponse(template, language);
-        textOutput = fallback.transcription.text;
-        wordsOutput = fallback.transcription.words || [];
       }
 
       clearInterval(progressInterval);
       setProgress(100);
-      await new Promise((r) => setTimeout(r, 250));
+      setStatusMessage('Transkripsi berhasil diselesaikan.');
+      await new Promise((r) => setTimeout(r, 200));
 
       onTranscriptionComplete?.(textOutput, targetFileName, wordsOutput, segmentsOutput);
 
@@ -107,12 +144,14 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Transcription error:', err);
+      setErrorMessage(err.message || 'Gagal memproses file audio.');
     } finally {
       clearInterval(progressInterval);
       setIsProcessing(false);
       setProgress(0);
+      setStatusMessage('');
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -232,6 +271,41 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
             </button>
           </div>
 
+          {/* Error Notice Banner inside GridScan Viewport */}
+          {errorMessage && (
+            <div className="absolute top-16 left-4 right-4 z-30 p-3 sm:p-4 bg-zinc-950/95 border border-amber-500/80 text-zinc-100 rounded-none shadow-2xl backdrop-blur-md font-mono text-xs max-w-xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pointer-events-auto">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-amber-300 uppercase tracking-wider text-[11px]">Notice</p>
+                  <p className="text-zinc-200 mt-0.5 leading-relaxed text-[11px] sm:text-xs">{errorMessage}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+                {onOpenSettings && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      onOpenSettings();
+                    }}
+                    className="px-2.5 py-1.5 bg-white hover:bg-zinc-200 text-black font-bold uppercase text-[10px] sm:text-[11px] rounded-none transition-colors flex items-center gap-1.5"
+                  >
+                    <Settings className="w-3 h-3" />
+                    <span>Buka Pengaturan</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="px-2 py-1.5 text-zinc-400 hover:text-white text-[10px] sm:text-[11px] uppercase transition-colors"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Area DROP & BROWSE (Kotak Invisible Sejajar Garis Grid Terowongan) */}
           <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center p-4">
             <div
@@ -262,11 +336,16 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               title={isProcessing ? 'Processing audio...' : 'Click to select file or drag audio/video here'}
             >
               {isProcessing ? (
-                <div className="flex flex-col items-center justify-center gap-2.5">
+                <div className="flex flex-col items-center justify-center gap-2.5 px-4 text-center">
                   <RefreshCw className="w-10 h-10 sm:w-11 sm:h-11 text-white animate-spin stroke-[1.3] drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]" />
                   <span className="text-sm sm:text-base font-mono tracking-wider text-white font-semibold tabular-nums">
                     {Math.min(100, Math.max(0, Math.round(progress)))}%
                   </span>
+                  {statusMessage && (
+                    <span className="text-[11px] sm:text-xs font-mono text-zinc-400 max-w-xs animate-pulse leading-snug">
+                      {statusMessage}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <>

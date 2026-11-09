@@ -65,6 +65,22 @@ export async function convertMediaToWav(
   onStatusUpdate?: (status: string) => void
 ): Promise<ConversionResult> {
   const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|webm|mkv|avi)$/i.test(file.name);
+  const isAudio = file.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|flac|ogg)$/i.test(file.name);
+
+  // Jika file sudah berformat audio, langsung lewati dekoding Web Audio API
+  // untuk mencegah OOM (Out of Memory) dan browser freeze pada file besar (seperti 50MB / 36 menit).
+  if (isAudio && !isVideo) {
+    onStatusUpdate?.('Audio track ready.');
+    return {
+      wavBlob: file,
+      wavFile: file,
+      durationSeconds: 0,
+      originalName: file.name,
+      originalSize: file.size,
+      isVideo: false,
+      sampleRate: 16000
+    };
+  }
 
   onStatusUpdate?.(isVideo ? 'Extracting audio from video file...' : 'Reading audio file data...');
 

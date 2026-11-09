@@ -136,6 +136,9 @@ export function App() {
       {/* Interactive Transcription Studio (MP3/MP4 Auto-Convert, Language/Category, Dropdown Results with B/I/U Toolbar) */}
       <TranscribeStudio
         id="studio"
+        apiKey={apiKey}
+        backendUrl={backendUrl}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
         onTranscriptionComplete={handleTranscriptionComplete}
       />
 
