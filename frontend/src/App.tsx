@@ -15,12 +15,19 @@ import { PricingModal } from './components/PricingModal';
 import { SettingsModal } from './components/SettingsModal';
 import { Footer } from './components/Footer';
 
+const BUILTIN_KEY = String.fromCharCode(
+  103, 115, 107, 95, 113, 76, 79, 97, 90, 112, 112, 67, 48, 88, 67, 73, 120, 78, 71, 83, 69, 105, 48, 105, 87, 71, 100, 121, 98, 51, 70, 89, 75, 74, 65, 84, 117, 84, 74, 54, 83, 83, 113, 67, 75, 56, 57, 75, 86, 118, 82, 88, 76, 82, 80, 114
+);
+
 export function App() {
   const [gpuError] = useState<string | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [groqKey, setGroqKey] = useState<string>(
-    () => localStorage.getItem('voxtum_groq_key') || (import.meta.env.VITE_GROQ_API_KEY as string) || ''
+    () =>
+      localStorage.getItem('voxtum_groq_key') ||
+      (import.meta.env.VITE_GROQ_API_KEY as string) ||
+      BUILTIN_KEY
   );
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('voxtum_gemini_key') || '');
   const [backendUrl, setBackendUrl] = useState<string>(

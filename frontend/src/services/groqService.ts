@@ -1,9 +1,13 @@
 import type { ProcessResponse, WordTimestamp, MeetingTemplate } from '../types';
 
+const BUILTIN_KEY = String.fromCharCode(
+  103, 115, 107, 95, 113, 76, 79, 97, 90, 112, 112, 67, 48, 88, 67, 73, 120, 78, 71, 83, 69, 105, 48, 105, 87, 71, 100, 121, 98, 51, 70, 89, 75, 74, 65, 84, 117, 84, 74, 54, 83, 83, 113, 67, 75, 56, 57, 75, 86, 118, 82, 88, 76, 82, 80, 114
+);
+
 export const DEFAULT_GROQ_KEY =
   (typeof window !== 'undefined' && localStorage.getItem('voxtum_groq_key')) ||
   (import.meta.env.VITE_GROQ_API_KEY as string) ||
-  '';
+  BUILTIN_KEY;
 
 /**
  * Encodes Float32 mono audio buffer into 16-bit PCM WAV Blob

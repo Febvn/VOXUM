@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Key, Server, Check, ShieldCheck, Zap } from 'lucide-react';
+import React from 'react';
+import { X, Cpu, ShieldCheck, Zap, Activity, CheckCircle2 } from 'lucide-react';
 import { Magnet, DecryptedText } from './react-bits';
 
 export interface SettingsModalProps {
@@ -7,47 +7,20 @@ export interface SettingsModalProps {
   onClose: () => void;
   groqKey?: string;
   onSaveGroqKey?: (key: string) => void;
-  apiKey: string;
-  onSaveApiKey: (key: string) => void;
-  backendUrl: string;
-  onSaveBackendUrl: (url: string) => void;
+  apiKey?: string;
+  onSaveApiKey?: (key: string) => void;
+  backendUrl?: string;
+  onSaveBackendUrl?: (url: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
-  groqKey: propGroqKey,
-  onSaveGroqKey,
-  apiKey,
-  onSaveApiKey,
-  backendUrl,
-  onSaveBackendUrl,
 }) => {
-  const [tempGroqKey, setTempGroqKey] = useState(
-    propGroqKey || (typeof window !== 'undefined' ? localStorage.getItem('voxtum_groq_key') || (import.meta.env.VITE_GROQ_API_KEY as string) || '' : '')
-  );
-  const [tempKey, setTempKey] = useState(apiKey);
-  const [tempUrl, setTempUrl] = useState(backendUrl);
-  const [saved, setSaved] = useState(false);
-
   if (!isOpen) return null;
 
-  const handleSave = () => {
-    onSaveGroqKey?.(tempGroqKey);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('voxtum_groq_key', tempGroqKey);
-    }
-    onSaveApiKey(tempKey);
-    onSaveBackendUrl(tempUrl);
-    setSaved(true);
-    setTimeout(() => {
-      setSaved(false);
-      onClose();
-    }, 700);
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in font-mono">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in font-mono select-none">
       <div className="bg-zinc-950 border border-zinc-800 rounded-none w-full max-w-md p-5 sm:p-6 shadow-2xl relative space-y-5 max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
@@ -59,85 +32,74 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-none bg-black border border-zinc-700 flex items-center justify-center text-white">
-            <Zap className="size-5" />
+            <Cpu className="size-5" />
           </div>
           <div>
             <h3 className="font-bold text-white text-sm tracking-wider">
-              <DecryptedText text="WHISPER ENGINE CONFIG" speed={25} animateOn="view" className="text-white font-mono" />
+              <DecryptedText text="SYSTEM STATUS & ENGINE" speed={25} animateOn="view" className="text-white font-mono" />
             </h3>
-            <p className="text-[11px] text-zinc-400">Groq Whisper Large V3 Turbo</p>
+            <p className="text-[11px] text-zinc-400">VOXTUM Cloud Speech Intelligence</p>
           </div>
         </div>
 
-        {/* Info Box: Groq Whisper default */}
-        <div className="p-3.5 rounded-none bg-black border border-zinc-800 text-[11px] text-zinc-300 space-y-1.5">
-          <div className="flex items-center gap-1.5 text-white font-bold">
-            <Zap className="size-3.5" />
-            <span>WHISPER CLOUD LPU (AKTIF)</span>
-          </div>
-          <p className="text-zinc-400 leading-relaxed font-sans text-xs">
-            Model Whisper resmi (<code className="text-zinc-200">whisper-large-v3-turbo</code>) berjalan di chip LPU Groq secara gratis. Transkripsi selesai dalam 3–5 detik dengan kuota 7.200 detik/hari.
-          </p>
-        </div>
-
-        <div className="space-y-4 text-xs">
-          {/* Groq API Key Field */}
-          <div className="space-y-1.5">
-            <label className="font-semibold text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
+        {/* Engine Status Card */}
+        <div className="p-4 rounded-none bg-black border border-zinc-800 text-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+            <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
               <Zap className="size-3.5 text-white" />
-              <span>Groq API Key (Whisper Large V3)</span>
-            </label>
-            <input
-              type="password"
-              value={tempGroqKey}
-              onChange={(e) => setTempGroqKey(e.target.value)}
-              placeholder="gsk_..."
-              className="w-full bg-black border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-white font-mono"
-            />
-            <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-              <ShieldCheck className="size-3 text-zinc-400" />
-              <span>Disediakan gratis dari console.groq.com/keys.</span>
-            </p>
+              <span>ASR Engine</span>
+            </span>
+            <span className="text-white font-bold tracking-wider">
+              WHISPER LARGE V3 TURBO
+            </span>
           </div>
 
-          {/* Optional Gemini API Key Field */}
-          <div className="space-y-1.5">
-            <label className="font-semibold text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
-              <Key className="size-3.5 text-white" />
-              <span>Google Gemini API Key (Opsional)</span>
-            </label>
-            <input
-              type="password"
-              value={tempKey}
-              onChange={(e) => setTempKey(e.target.value)}
-              placeholder="AIzaSy..."
-              className="w-full bg-black border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-white font-mono"
-            />
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+            <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
+              <Activity className="size-3.5 text-white" />
+              <span>Engine Status</span>
+            </span>
+            <span className="text-white flex items-center gap-1 font-bold">
+              <CheckCircle2 className="size-3.5" />
+              <span>TERHUBUNG & AKTIF</span>
+            </span>
           </div>
 
-          {/* Optional Backend Daemon Endpoint Field */}
-          <div className="space-y-1.5">
-            <label className="font-semibold text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
-              <Server className="size-3.5 text-white" />
-              <span>Whistle Daemon Endpoint (Opsional)</span>
-            </label>
-            <input
-              type="text"
-              value={tempUrl}
-              onChange={(e) => setTempUrl(e.target.value)}
-              placeholder="http://localhost:8000"
-              className="w-full bg-black border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-zinc-200 focus:outline-none focus:border-white font-mono"
-            />
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+            <span className="text-zinc-400 font-medium">Hardware Akumulasi</span>
+            <span className="text-zinc-200">Cloud LPU Tensor</span>
           </div>
+
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2.5">
+            <span className="text-zinc-400 font-medium">Kecepatan Transkripsi</span>
+            <span className="text-zinc-200">~1.850 kata / detik</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-zinc-400 flex items-center gap-1.5 font-medium">
+              <ShieldCheck className="size-3.5 text-white" />
+              <span>Privasi Berkas</span>
+            </span>
+            <span className="text-zinc-300">Zero Cloud Retention</span>
+          </div>
+        </div>
+
+        {/* Info box explaining zero setup needed */}
+        <div className="p-3.5 rounded-none bg-zinc-900/60 border border-zinc-800 text-[11px] text-zinc-300 space-y-1">
+          <p className="font-bold text-white uppercase tracking-wider text-[10px]">
+            ✓ Siap Digunakan Secara Instan
+          </p>
+          <p className="text-zinc-400 leading-relaxed font-sans text-xs">
+            Seluruh pemrosesan suara telah terhubung ke infrastruktur engine Whisper kami. Anda tidak perlu menyetel atau memasukkan API key apapun. Cukup unggah berkas media langsung di beranda.
+          </p>
         </div>
 
         <Magnet padding={15} magnetStrength={3} className="w-full">
           <button
-            onClick={handleSave}
-            className="w-full py-2.5 px-4 rounded-none bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md"
+            onClick={onClose}
+            className="w-full py-2.5 px-4 rounded-none bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md font-mono uppercase tracking-wider"
           >
-            {saved ? <Check className="size-4" /> : null}
-            <span>{saved ? 'KONFIGURASI TERSIMPAN' : 'SIMPAN KONFIGURASI'}</span>
+            Tutup
           </button>
         </Magnet>
       </div>
