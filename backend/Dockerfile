@@ -6,18 +6,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Set up user with UID 1000 for Hugging Face Spaces compatibility
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH \
+    PYTHONUNBUFFERED=1
+
+WORKDIR $HOME/app
 
 # Copy requirements and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --chown=user:user requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy backend application code
-COPY . .
+COPY --chown=user:user . .
 
-# Expose default port
-ENV PORT=8000
-EXPOSE 8000
+# Hugging Face Spaces standard port is 7860
+ENV PORT=7860
+EXPOSE 7860
 
 # Start FastAPI uvicorn daemon
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-7860}"]

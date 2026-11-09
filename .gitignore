@@ -36,6 +36,9 @@ Thumbs.db
 *.wav
 *.ogg
 sample_*.mp3
+*.mp3
+!frontend/public/samples/*.mp3
+nov-*.txt
 !frontend/public/*.png
 !frontend/public/*.svg
 !frontend/public/samples/*

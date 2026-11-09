@@ -12,7 +12,7 @@ import { TranscribeStudio } from './components/TranscribeStudio';
 import { ClayContainer } from './components/ClayContainer';
 import { PricingSection } from './components/PricingSection';
 import { PricingModal } from './components/PricingModal';
-import { SettingsModal } from './components/SettingsModal';
+import { SettingsModal, type EngineMode } from './components/SettingsModal';
 import { Footer } from './components/Footer';
 
 export function App() {
@@ -20,6 +20,11 @@ export function App() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('voxtum_gemini_key') || '');
+  const [engineMode, setEngineMode] = useState<EngineMode>(() => {
+    const saved = localStorage.getItem('voxtum_engine_mode');
+    if (saved === 'browser' || saved === 'gemini' || saved === 'server') return saved as EngineMode;
+    return localStorage.getItem('voxtum_gemini_key') ? 'gemini' : 'browser';
+  });
   const [backendUrl, setBackendUrl] = useState<string>(
     () =>
       localStorage.getItem('voxtum_backend_url') ||
@@ -143,6 +148,11 @@ export function App() {
         id="studio"
         apiKey={apiKey}
         backendUrl={backendUrl}
+        engineMode={engineMode}
+        onEngineModeChange={(mode) => {
+          setEngineMode(mode);
+          localStorage.setItem('voxtum_engine_mode', mode);
+        }}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onTranscriptionComplete={handleTranscriptionComplete}
       />
@@ -228,6 +238,11 @@ export function App() {
         onSaveBackendUrl={(url) => {
           setBackendUrl(url);
           localStorage.setItem('voxtum_backend_url', url);
+        }}
+        engineMode={engineMode}
+        onSaveEngineMode={(mode) => {
+          setEngineMode(mode);
+          localStorage.setItem('voxtum_engine_mode', mode);
         }}
       />
 

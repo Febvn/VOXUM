@@ -7,14 +7,18 @@ import {
 } from 'lucide-react';
 import type { MeetingTemplate, ProcessResponse, WordTimestamp } from '../types';
 import { generateDemoResponse, processAudioWithGeminiDirect } from '../services/apiService';
+import { transcribeInBrowser } from '../services/inBrowserWhistle';
 import { convertMediaToWav } from '../utils/mediaConverter';
 import { GridScan } from './react-bits';
+import type { EngineMode } from './SettingsModal';
 
 export interface TranscribeStudioProps {
   id?: string;
   className?: string;
   apiKey?: string;
   backendUrl?: string;
+  engineMode?: EngineMode;
+  onEngineModeChange?: (mode: EngineMode) => void;
   onOpenSettings?: () => void;
   onTranscriptionComplete?: (
     text: string,
@@ -29,12 +33,34 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   className = '',
   apiKey,
   backendUrl,
+  engineMode: propEngineMode,
+  onEngineModeChange,
   onOpenSettings,
   onTranscriptionComplete
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [enableWebcamScan, setEnableWebcamScan] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [localEngineMode, setLocalEngineMode] = useState<EngineMode>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('voxtum_engine_mode');
+      if (saved === 'browser' || saved === 'gemini' || saved === 'server') {
+        return saved as EngineMode;
+      }
+    }
+    return (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key'))) ? 'gemini' : 'browser';
+  });
+
+  const currentEngine = propEngineMode || localEngineMode;
+
+  const handleEngineChange = (mode: EngineMode) => {
+    setLocalEngineMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('voxtum_engine_mode', mode);
+    }
+    onEngineModeChange?.(mode);
+  };
 
   const [language, setLanguage] = useState<string>('auto');
   const [template] = useState<MeetingTemplate>('general');
@@ -68,7 +94,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
         const conv = await convertMediaToWav(file, (msg) => setStatusMessage(msg));
         fileToUpload = conv.wavFile;
         targetFileName = conv.originalName || file.name;
-        setProgress((prev) => Math.max(prev, 25));
+        setProgress((prev) => Math.max(prev, 15));
       } catch (convErr) {
         console.warn('Media conversion bypass/fallback:', convErr);
       }
@@ -85,37 +111,56 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       let wordsOutput: WordTimestamp[] = [];
       let segmentsOutput: { start: number; end: number; text: string }[] = [];
 
-      // 1. Prioritaskan Google Gemini API Direct jika API Key disetel
-      if (activeApiKey) {
-        setStatusMessage('Menghubungkan ke Google Gemini Multimodal Studio...');
-        try {
-          const directRes = await processAudioWithGeminiDirect(
-            fileToUpload,
-            activeApiKey,
-            language,
-            template,
-            keywords,
-            (msg) => setStatusMessage(msg)
+      // EKSEKUSI SESUAI ENGINE YANG DIPILIH
+      if (currentEngine === 'browser') {
+        // 1. Whistle In-Browser (100% di Laptop Pengguna via WebGPU / WASM)
+        clearInterval(progressInterval);
+        setStatusMessage('Menjalankan Whistle ASR di laptop Anda...');
+        const browserRes = await transcribeInBrowser(
+          fileToUpload,
+          language,
+          template,
+          (msg, pct) => {
+            setStatusMessage(msg);
+            if (typeof pct === 'number' && pct > 0) {
+              setProgress(pct);
+            }
+          }
+        );
+        textOutput = browserRes.transcription?.text || '';
+        wordsOutput = browserRes.transcription?.words || [];
+        segmentsOutput = browserRes.transcription?.segments || [];
+      } else if (currentEngine === 'gemini') {
+        // 2. Google Gemini API Direct (Multimodal Cloud)
+        if (!activeApiKey) {
+          throw new Error(
+            'API Key Google Gemini belum diatur. Silakan buka Pengaturan atau ganti ke engine "⚡ Whistle Laptop" untuk pemrosesan 100% gratis tanpa API Key.'
           );
-          textOutput = directRes.transcription?.text || '';
-          wordsOutput = directRes.transcription?.words || [];
-          segmentsOutput = directRes.transcription?.segments || [];
-        } catch (geminiErr: any) {
-          console.error('Gemini direct processing failed:', geminiErr);
-          throw new Error(`Gemini API: ${geminiErr.message || String(geminiErr)}`);
         }
+        setStatusMessage('Menghubungkan ke Google Gemini Multimodal Studio...');
+        const directRes = await processAudioWithGeminiDirect(
+          fileToUpload,
+          activeApiKey,
+          language,
+          template,
+          keywords,
+          (msg) => setStatusMessage(msg)
+        );
+        textOutput = directRes.transcription?.text || '';
+        wordsOutput = directRes.transcription?.words || [];
+        segmentsOutput = directRes.transcription?.segments || [];
       } else {
-        // 2. Fallback ke Local Whistle Backend
+        // 3. Whistle External Server Daemon Endpoint
         const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
         const isLocalhostBackend = activeBackendUrl.startsWith('http://localhost') || activeBackendUrl.startsWith('http://127.0.0.1');
 
         if (isHttps && isLocalhostBackend) {
           throw new Error(
-            'Website online (HTTPS) memblokir koneksi ke http://localhost (proteksi Mixed-Content browser). Silakan masukkan Google Gemini API Key Anda di Pengaturan untuk transkripsi langsung dari browser.'
+            'Website online (HTTPS) memblokir koneksi ke http://localhost (proteksi Mixed-Content browser). Silakan gunakan engine "⚡ Whistle Laptop" untuk memproses audio langsung di browser tanpa server.'
           );
         }
 
-        setStatusMessage('Mengirim ke Whistle ASR Engine...');
+        setStatusMessage('Mengirim ke Whistle Server Endpoint...');
         const formData = new FormData();
         formData.append('file', fileToUpload);
         formData.append('language', language);
@@ -214,7 +259,6 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       aria-label="Audio and Video Transcription Studio"
       className={`w-full bg-black text-white p-0 m-0 font-['Geist',system-ui,-apple-system,sans-serif] select-none ${className}`}
     >
-      {/* KOTAK 1: GRIDSCAN INTERACTIVE MEDIA DROP ZONE & BROWSE (Mentok Full Width Edge-to-Edge) */}
       <div className="w-full rounded-none bg-black overflow-hidden relative">
         <input
           ref={fileInputRef}
@@ -224,9 +268,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
           className="hidden"
         />
 
-        {/* 3D GridScan Interactive Viewport (height: 600px - 700px mentok) */}
         <div className="relative w-full h-[600px] sm:h-[700px] bg-black select-none overflow-hidden">
-          {/* Background 3D GridScan WebGL Engine (Bloom & Laser ping-pong aktif saat media di-drop/diproses) */}
           <div className="absolute inset-0 w-full h-full">
             <GridScan
               enableHover={false}
@@ -250,6 +292,49 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               selectedLanguage={language}
               onSelectLanguage={(langCode) => setLanguage(langCode)}
             />
+          </div>
+
+          {/* Top-Left Engine Selector inside GridScan Viewport */}
+          <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 pointer-events-auto">
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest hidden sm:inline mr-1">
+              ENGINE:
+            </span>
+            <button
+              type="button"
+              onClick={() => handleEngineChange('browser')}
+              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
+                currentEngine === 'browser'
+                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
+              }`}
+              title="Whistle In-Browser WebGPU/WASM (100% lokal di laptop Anda, 0 server cost)"
+            >
+              <span>⚡ Whistle Laptop</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleEngineChange('gemini')}
+              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
+                currentEngine === 'gemini'
+                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
+              }`}
+              title="Google Gemini Flash Cloud API"
+            >
+              <span>☁ Gemini Cloud</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleEngineChange('server')}
+              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
+                currentEngine === 'server'
+                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
+              }`}
+              title="Whistle Server Daemon Endpoint (localhost / remote)"
+            >
+              <span>🖥 Server</span>
+            </button>
           </div>
 
           {/* Top-Right Utility Overlay in GridScan Viewport */}
@@ -311,7 +396,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
             </div>
           )}
 
-          {/* Area DROP & BROWSE (Kotak Invisible Sejajar Garis Grid Terowongan) */}
+          {/* Area DROP & BROWSE */}
           <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center p-4">
             <div
               onDragOver={(e) => {
