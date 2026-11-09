@@ -171,7 +171,7 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
   segments
 }) => {
   const [internalText, setInternalText] = useState<string>('');
-  const [timestampMode, setTimestampMode] = useState<TimestampMode>('none');
+  const [timestampMode, setTimestampMode] = useState<TimestampMode>('mmss');
   const [copied, setCopied] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -185,6 +185,8 @@ export const ClayContainer: React.FC<ClayContainerProps> = ({
     if (externalText !== undefined) {
       if (!/^\[\d+.*\]/m.test(externalText)) {
         rawBaseTextRef.current = externalText;
+      } else {
+        rawBaseTextRef.current = externalText.replace(/^\[\d{2}:\d{2}(?:\s*-\s*\d{2}:\d{2})?\]\s*(?:Speaker\s*\d+:)?\s*/gim, '');
       }
       const formatted = formatTranscriptWithTimestamps(timestampMode, externalText, segments, words);
       setInternalText(formatted);

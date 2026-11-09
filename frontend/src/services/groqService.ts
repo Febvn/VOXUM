@@ -150,14 +150,20 @@ async function diarizeConversation(
   }
 
   const segmentLines = segments
-    .slice(0, 100) // Batasi 100 segmen per batch analisis percakapan
+    .slice(0, 350)
     .map((s, idx) => `${idx + 1}. ${formatTimeRange(s.start, s.end)} ${s.text.trim()}`)
     .join('\n');
 
   try {
-    onProgress?.('Menganalisis jenis suara & giliran bicara (Speaker 1, Speaker 2)...');
+    onProgress?.('Menganalisis perbedaan suara & penutur percakapan (Speaker 1, 2, 3, dst)...');
 
-    const prompt = `Anda adalah sistem audio intelligence profesional. Tugas Anda adalah membedakan pembicara (Speaker 1, Speaker 2, dst) pada setiap baris transkripsi berikut berdasarkan giliran percakapan, tanya-jawab, salam-balasan, dan pergantian subjek/topik.
+    const prompt = `Anda adalah sistem audio intelligence profesional. Tugas Anda adalah mengidentifikasi dan membedakan SEMUA pembicara (Speaker 1, Speaker 2, Speaker 3, Speaker 4, dst - tidak terbatas hanya 2 orang, sesuai banyaknya orang yang berbicara dalam rekaman) pada setiap baris transkripsi berikut.
+
+Analisis didasarkan pada:
+1. Giliran bicara (turn-taking) antar partisipan
+2. Pola tanya-jawab dan tanggapan
+3. Sapaan nama orang, peran, atau jabatan
+4. Perubahan topik atau sudut pandang subjek
 
 Daftar Segmen:
 ${segmentLines}
@@ -167,9 +173,10 @@ Keluarkan setiap baris persis seperti contoh:
 [MM:SS - MM:SS] Speaker X: <teks percakapan asli>
 
 Aturan Penting:
-1. Setiap baris HARUS diawali rentang waktu [MM:SS - MM:SS] dan label pembicara (misal "Speaker 1:" atau "Speaker 2:").
-2. Jangan merubah teks kalimat asli.
-3. HANYA keluarkan hasil percakapan tanpa kalimat pengantar atau penutup.`;
+1. Setiap baris HARUS diawali rentang waktu [MM:SS - MM:SS] dan label pembicara (misal "Speaker 1:", "Speaker 2:", "Speaker 3:", dst).
+2. Deteksi setiap orang baru yang berbicara sebagai Speaker yang berbeda. Jika orang pertama berbicara lagi, gunakan kembali labelnya yang sesuai.
+3. Jangan merubah teks kalimat asli.
+4. HANYA keluarkan hasil percakapan tanpa kalimat pengantar atau penutup.`;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -194,7 +201,7 @@ Aturan Penting:
       if (lines.length > 0) {
         const updatedSegments: { start: number; end: number; text: string; speaker?: string }[] = [];
         lines.forEach((line: string, i: number) => {
-          const match = line.match(/^\[(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\]\s*(Speaker\s*\d+):?\s*(.*)$/i);
+          const match = line.match(/^(?:\d+[\.\)]\s*)?\[(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\]\s*(Speaker\s*\d+):?\s*(.*)$/i);
           if (match) {
             const speaker = match[3];
             const textContent = match[4];
@@ -233,7 +240,7 @@ Aturan Penting:
       const gap = s.start - (prev.end || prev.start);
       const prevAsked = /[?!]$/.test(prev.text.trim());
       if (gap > 1.2 || prevAsked) {
-        currentSpeaker = currentSpeaker === 1 ? 2 : 1;
+        currentSpeaker = (currentSpeaker % 3) + 1; // Mendukung variasi hingga 3 pembicara di fallback
       }
     }
     return {
