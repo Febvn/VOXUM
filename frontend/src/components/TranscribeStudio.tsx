@@ -10,15 +10,12 @@ import { generateDemoResponse, processAudioWithGeminiDirect } from '../services/
 import { transcribeInBrowser } from '../services/inBrowserWhistle';
 import { convertMediaToWav } from '../utils/mediaConverter';
 import { GridScan } from './react-bits';
-import type { EngineMode } from './SettingsModal';
 
 export interface TranscribeStudioProps {
   id?: string;
   className?: string;
   apiKey?: string;
   backendUrl?: string;
-  engineMode?: EngineMode;
-  onEngineModeChange?: (mode: EngineMode) => void;
   onOpenSettings?: () => void;
   onTranscriptionComplete?: (
     text: string,
@@ -33,34 +30,12 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   className = '',
   apiKey,
   backendUrl,
-  engineMode: propEngineMode,
-  onEngineModeChange,
   onOpenSettings,
   onTranscriptionComplete
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [enableWebcamScan, setEnableWebcamScan] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [localEngineMode, setLocalEngineMode] = useState<EngineMode>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('voxtum_engine_mode');
-      if (saved === 'browser' || saved === 'gemini' || saved === 'server') {
-        return saved as EngineMode;
-      }
-    }
-    return (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key'))) ? 'gemini' : 'browser';
-  });
-
-  const currentEngine = propEngineMode || localEngineMode;
-
-  const handleEngineChange = (mode: EngineMode) => {
-    setLocalEngineMode(mode);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('voxtum_engine_mode', mode);
-    }
-    onEngineModeChange?.(mode);
-  };
 
   const [language, setLanguage] = useState<string>('auto');
   const [template] = useState<MeetingTemplate>('general');
@@ -111,9 +86,8 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       let wordsOutput: WordTimestamp[] = [];
       let segmentsOutput: { start: number; end: number; text: string }[] = [];
 
-      // EKSEKUSI SESUAI ENGINE YANG DIPILIH
-      if (currentEngine === 'browser') {
-        // 1. Whistle In-Browser (100% di Laptop Pengguna via WebGPU / WASM)
+      // DEFAULT UTAMA: Komputasi sepenuhnya di laptop pengunjung menggunakan Whistle In-Browser (WebGPU/WASM)
+      try {
         clearInterval(progressInterval);
         setStatusMessage('Menjalankan Whistle ASR di laptop Anda...');
         const browserRes = await transcribeInBrowser(
@@ -130,57 +104,47 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
         textOutput = browserRes.transcription?.text || '';
         wordsOutput = browserRes.transcription?.words || [];
         segmentsOutput = browserRes.transcription?.segments || [];
-      } else if (currentEngine === 'gemini') {
-        // 2. Google Gemini API Direct (Multimodal Cloud)
-        if (!activeApiKey) {
-          throw new Error(
-            'API Key Google Gemini belum diatur. Silakan buka Pengaturan atau ganti ke engine "⚡ Whistle Laptop" untuk pemrosesan 100% gratis tanpa API Key.'
+      } catch (inBrowserErr: any) {
+        console.warn('Komputasi lokal laptop mengalami kendala, mencoba fallback...', inBrowserErr);
+
+        // Fallback otomatis jika perangkat tidak mendukung Web Audio/Web Worker
+        if (activeApiKey) {
+          setStatusMessage('Beralih ke fallback cloud...');
+          const directRes = await processAudioWithGeminiDirect(
+            fileToUpload,
+            activeApiKey,
+            language,
+            template,
+            keywords,
+            (msg) => setStatusMessage(msg)
           );
+          textOutput = directRes.transcription?.text || '';
+          wordsOutput = directRes.transcription?.words || [];
+          segmentsOutput = directRes.transcription?.segments || [];
+        } else if (activeBackendUrl && !activeBackendUrl.startsWith('http://localhost')) {
+          setStatusMessage('Beralih ke fallback backend daemon...');
+          const formData = new FormData();
+          formData.append('file', fileToUpload);
+          formData.append('language', language);
+          if (keywords) formData.append('keywords', keywords);
+
+          const cleanBaseUrl = activeBackendUrl.replace(/\/+$/, '');
+          const response = await fetch(`${cleanBaseUrl}/api/process`, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            throw inBrowserErr;
+          }
+
+          const data: ProcessResponse = await response.json();
+          textOutput = data.transcription?.text || '';
+          wordsOutput = data.transcription?.words || [];
+          segmentsOutput = data.transcription?.segments || [];
+        } else {
+          throw inBrowserErr;
         }
-        setStatusMessage('Menghubungkan ke Google Gemini Multimodal Studio...');
-        const directRes = await processAudioWithGeminiDirect(
-          fileToUpload,
-          activeApiKey,
-          language,
-          template,
-          keywords,
-          (msg) => setStatusMessage(msg)
-        );
-        textOutput = directRes.transcription?.text || '';
-        wordsOutput = directRes.transcription?.words || [];
-        segmentsOutput = directRes.transcription?.segments || [];
-      } else {
-        // 3. Whistle External Server Daemon Endpoint
-        const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-        const isLocalhostBackend = activeBackendUrl.startsWith('http://localhost') || activeBackendUrl.startsWith('http://127.0.0.1');
-
-        if (isHttps && isLocalhostBackend) {
-          throw new Error(
-            'Website online (HTTPS) memblokir koneksi ke http://localhost (proteksi Mixed-Content browser). Silakan gunakan engine "⚡ Whistle Laptop" untuk memproses audio langsung di browser tanpa server.'
-          );
-        }
-
-        setStatusMessage('Mengirim ke Whistle Server Endpoint...');
-        const formData = new FormData();
-        formData.append('file', fileToUpload);
-        formData.append('language', language);
-        if (keywords) formData.append('keywords', keywords);
-
-        const cleanBaseUrl = activeBackendUrl.replace(/\/+$/, '');
-        const response = await fetch(`${cleanBaseUrl}/api/process`, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          const errText = await response.text();
-          throw new Error(`Server ${response.status}: ${errText || 'Koneksi backend gagal'}`);
-        }
-
-        const data: ProcessResponse = await response.json();
-        textOutput = data.transcription?.text || '';
-        wordsOutput = data.transcription?.words || [];
-        segmentsOutput = data.transcription?.segments || [];
       }
 
       clearInterval(progressInterval);
@@ -196,7 +160,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       }
     } catch (err: any) {
       console.error('Transcription error:', err);
-      setErrorMessage(err.message || 'Gagal memproses file audio.');
+      setErrorMessage(err.message || 'Gagal memproses file audio di laptop Anda.');
     } finally {
       clearInterval(progressInterval);
       setIsProcessing(false);
@@ -294,49 +258,6 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
             />
           </div>
 
-          {/* Top-Left Engine Selector inside GridScan Viewport */}
-          <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 pointer-events-auto">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest hidden sm:inline mr-1">
-              ENGINE:
-            </span>
-            <button
-              type="button"
-              onClick={() => handleEngineChange('browser')}
-              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
-                currentEngine === 'browser'
-                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
-                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
-              }`}
-              title="Whistle In-Browser WebGPU/WASM (100% lokal di laptop Anda, 0 server cost)"
-            >
-              <span>⚡ Whistle Laptop</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleEngineChange('gemini')}
-              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
-                currentEngine === 'gemini'
-                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
-                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
-              }`}
-              title="Google Gemini Flash Cloud API"
-            >
-              <span>☁ Gemini Cloud</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleEngineChange('server')}
-              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors flex items-center gap-1.5 ${
-                currentEngine === 'server'
-                  ? 'border-white bg-white/20 text-white font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]'
-                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white hover:border-zinc-700'
-              }`}
-              title="Whistle Server Daemon Endpoint (localhost / remote)"
-            >
-              <span>🖥 Server</span>
-            </button>
-          </div>
-
           {/* Top-Right Utility Overlay in GridScan Viewport */}
           <div className="absolute top-4 right-4 z-20 flex items-center gap-2.5 pointer-events-auto">
             <button
@@ -382,7 +303,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
                     className="px-2.5 py-1.5 bg-white hover:bg-zinc-200 text-black font-bold uppercase text-[10px] sm:text-[11px] rounded-none transition-colors flex items-center gap-1.5"
                   >
                     <Settings className="w-3 h-3" />
-                    <span>Buka Pengaturan</span>
+                    <span>Pengaturan</span>
                   </button>
                 )}
                 <button
