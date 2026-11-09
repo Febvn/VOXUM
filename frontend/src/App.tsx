@@ -21,7 +21,10 @@ export function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('voxtum_gemini_key') || '');
   const [backendUrl, setBackendUrl] = useState<string>(
-    () => localStorage.getItem('voxtum_backend_url') || (import.meta.env.VITE_BACKEND_URL as string) || 'http://localhost:8000'
+    () =>
+      localStorage.getItem('voxtum_backend_url') ||
+      (import.meta.env.VITE_BACKEND_URL as string) ||
+      'https://descriptions-identifier-code-record.trycloudflare.com'
   );
   const [activePlan, setActivePlan] = useState<string>('free');
   const [transcriptText, setTranscriptText] = useState<string>('');

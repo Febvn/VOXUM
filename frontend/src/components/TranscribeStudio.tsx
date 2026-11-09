@@ -78,7 +78,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
         backendUrl ||
         (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) ||
         (import.meta.env.VITE_BACKEND_URL as string) ||
-        'http://localhost:8000'
+        'https://descriptions-identifier-code-record.trycloudflare.com'
       ).trim();
 
       let textOutput = '';
