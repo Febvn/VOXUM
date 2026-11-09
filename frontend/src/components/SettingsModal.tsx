@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { X, Key, Server, Cpu, Check, ShieldCheck } from 'lucide-react';
+import { X, Key, Server, Check, ShieldCheck, Zap } from 'lucide-react';
 import { Magnet, DecryptedText } from './react-bits';
 
 export interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  groqKey?: string;
+  onSaveGroqKey?: (key: string) => void;
   apiKey: string;
   onSaveApiKey: (key: string) => void;
   backendUrl: string;
@@ -14,11 +16,16 @@ export interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
+  groqKey: propGroqKey,
+  onSaveGroqKey,
   apiKey,
   onSaveApiKey,
   backendUrl,
   onSaveBackendUrl,
 }) => {
+  const [tempGroqKey, setTempGroqKey] = useState(
+    propGroqKey || (typeof window !== 'undefined' ? localStorage.getItem('voxtum_groq_key') || (import.meta.env.VITE_GROQ_API_KEY as string) || '' : '')
+  );
   const [tempKey, setTempKey] = useState(apiKey);
   const [tempUrl, setTempUrl] = useState(backendUrl);
   const [saved, setSaved] = useState(false);
@@ -26,6 +33,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   const handleSave = () => {
+    onSaveGroqKey?.(tempGroqKey);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('voxtum_groq_key', tempGroqKey);
+    }
     onSaveApiKey(tempKey);
     onSaveBackendUrl(tempUrl);
     setSaved(true);
@@ -48,33 +59,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-none bg-black border border-zinc-700 flex items-center justify-center text-white">
-            <Cpu className="size-5" />
+            <Zap className="size-5" />
           </div>
           <div>
             <h3 className="font-bold text-white text-sm tracking-wider">
-              <DecryptedText text="ENGINE SETTINGS" speed={25} animateOn="view" className="text-white font-mono" />
+              <DecryptedText text="WHISPER ENGINE CONFIG" speed={25} animateOn="view" className="text-white font-mono" />
             </h3>
-            <p className="text-[11px] text-zinc-400">Whistle In-Browser On-Device ASR</p>
+            <p className="text-[11px] text-zinc-400">Groq Whisper Large V3 Turbo</p>
           </div>
         </div>
 
-        {/* Info Box: Client-side compute default */}
+        {/* Info Box: Groq Whisper default */}
         <div className="p-3.5 rounded-none bg-black border border-zinc-800 text-[11px] text-zinc-300 space-y-1.5">
           <div className="flex items-center gap-1.5 text-white font-bold">
-            <Cpu className="size-3.5" />
-            <span>KOMPUTASI DI LAPTOP USER (DEFAULT)</span>
+            <Zap className="size-3.5" />
+            <span>WHISPER CLOUD LPU (AKTIF)</span>
           </div>
           <p className="text-zinc-400 leading-relaxed font-sans text-xs">
-            Secara default seluruh proses ASR ditanggung langsung oleh kartu grafis (WebGPU) atau prosesor (WASM) di laptop pengunjung web. Bebas biaya server dan berkas audio tidak dikirim ke cloud.
+            Model Whisper resmi (<code className="text-zinc-200">whisper-large-v3-turbo</code>) berjalan di chip LPU Groq secara gratis. Transkripsi selesai dalam 3–5 detik dengan kuota 7.200 detik/hari.
           </p>
         </div>
 
         <div className="space-y-4 text-xs">
+          {/* Groq API Key Field */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
+              <Zap className="size-3.5 text-white" />
+              <span>Groq API Key (Whisper Large V3)</span>
+            </label>
+            <input
+              type="password"
+              value={tempGroqKey}
+              onChange={(e) => setTempGroqKey(e.target.value)}
+              placeholder="gsk_..."
+              className="w-full bg-black border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-white font-mono"
+            />
+            <p className="text-[10px] text-zinc-500 flex items-center gap-1">
+              <ShieldCheck className="size-3 text-zinc-400" />
+              <span>Disediakan gratis dari console.groq.com/keys.</span>
+            </p>
+          </div>
+
           {/* Optional Gemini API Key Field */}
           <div className="space-y-1.5">
             <label className="font-semibold text-zinc-300 flex items-center gap-1.5 uppercase tracking-wider">
               <Key className="size-3.5 text-white" />
-              <span>Google Gemini API Key (Opsional Fallback)</span>
+              <span>Google Gemini API Key (Opsional)</span>
             </label>
             <input
               type="password"
@@ -83,10 +113,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               placeholder="AIzaSy..."
               className="w-full bg-black border border-zinc-800 rounded-none px-3.5 py-2.5 text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-white font-mono"
             />
-            <p className="text-[10px] text-zinc-500 flex items-center gap-1">
-              <ShieldCheck className="size-3 text-zinc-400" />
-              <span>Disimpan di LocalStorage browser pribadi.</span>
-            </p>
           </div>
 
           {/* Optional Backend Daemon Endpoint Field */}

@@ -19,6 +19,9 @@ export function App() {
   const [gpuError] = useState<string | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [groqKey, setGroqKey] = useState<string>(
+    () => localStorage.getItem('voxtum_groq_key') || (import.meta.env.VITE_GROQ_API_KEY as string) || ''
+  );
   const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('voxtum_gemini_key') || '');
   const [backendUrl, setBackendUrl] = useState<string>(
     () =>
@@ -141,6 +144,7 @@ export function App() {
       {/* Interactive Transcription Studio (MP3/MP4 Auto-Convert, Language/Category, Dropdown Results with B/I/U Toolbar) */}
       <TranscribeStudio
         id="studio"
+        groqKey={groqKey}
         apiKey={apiKey}
         backendUrl={backendUrl}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
@@ -219,6 +223,11 @@ export function App() {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+        groqKey={groqKey}
+        onSaveGroqKey={(key) => {
+          setGroqKey(key);
+          localStorage.setItem('voxtum_groq_key', key);
+        }}
         apiKey={apiKey}
         onSaveApiKey={(key) => {
           setApiKey(key);

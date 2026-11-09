@@ -5,8 +5,9 @@ import {
   AlertCircle,
   Settings
 } from 'lucide-react';
-import type { MeetingTemplate, ProcessResponse, WordTimestamp } from '../types';
+import type { MeetingTemplate, WordTimestamp } from '../types';
 import { generateDemoResponse, processAudioWithGeminiDirect } from '../services/apiService';
+import { transcribeWithGroq, DEFAULT_GROQ_KEY } from '../services/groqService';
 import { transcribeInBrowser } from '../services/inBrowserWhistle';
 import { convertMediaToWav } from '../utils/mediaConverter';
 import { GridScan } from './react-bits';
@@ -14,6 +15,7 @@ import { GridScan } from './react-bits';
 export interface TranscribeStudioProps {
   id?: string;
   className?: string;
+  groqKey?: string;
   apiKey?: string;
   backendUrl?: string;
   onOpenSettings?: () => void;
@@ -28,8 +30,8 @@ export interface TranscribeStudioProps {
 export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   id = 'studio',
   className = '',
+  groqKey,
   apiKey,
-  backendUrl,
   onOpenSettings,
   onTranscriptionComplete
 }) => {
@@ -74,20 +76,75 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
         console.warn('Media conversion bypass/fallback:', convErr);
       }
 
-      const activeApiKey = (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key')) || '').trim();
-      const activeBackendUrl = (
-        backendUrl ||
-        (typeof window !== 'undefined' && localStorage.getItem('voxtum_backend_url')) ||
-        (import.meta.env.VITE_BACKEND_URL as string) ||
-        'https://descriptions-identifier-code-record.trycloudflare.com'
+      const activeGroqKey = (
+        groqKey ||
+        (typeof window !== 'undefined' && localStorage.getItem('voxtum_groq_key')) ||
+        (import.meta.env.VITE_GROQ_API_KEY as string) ||
+        DEFAULT_GROQ_KEY
       ).trim();
+
+      const activeApiKey = (apiKey || (typeof window !== 'undefined' && localStorage.getItem('voxtum_gemini_key')) || '').trim();
 
       let textOutput = '';
       let wordsOutput: WordTimestamp[] = [];
       let segmentsOutput: { start: number; end: number; text: string }[] = [];
 
-      // DEFAULT UTAMA: Komputasi sepenuhnya di laptop pengunjung menggunakan Whistle In-Browser (WebGPU/WASM)
-      try {
+      // 1. PRIORITAS UTAMA: Groq Whisper Large V3 Turbo (~3-5 detik selesai, 100% gratis)
+      if (activeGroqKey) {
+        try {
+          clearInterval(progressInterval);
+          setStatusMessage('Mentranskripsi dengan Groq Whisper Large V3 Turbo...');
+          const groqRes = await transcribeWithGroq(
+            fileToUpload,
+            activeGroqKey,
+            language,
+            template,
+            (msg, pct) => {
+              setStatusMessage(msg);
+              if (typeof pct === 'number' && pct > 0) {
+                setProgress(pct);
+              }
+            }
+          );
+          textOutput = groqRes.transcription?.text || '';
+          wordsOutput = groqRes.transcription?.words || [];
+          segmentsOutput = groqRes.transcription?.segments || [];
+        } catch (groqErr: any) {
+          console.warn('Groq Whisper kendala, mencoba fallback lokal/cloud:', groqErr);
+
+          // Fallback ke Gemini jika ada key
+          if (activeApiKey) {
+            setStatusMessage('Beralih ke fallback Gemini Cloud...');
+            const directRes = await processAudioWithGeminiDirect(
+              fileToUpload,
+              activeApiKey,
+              language,
+              template,
+              keywords,
+              (msg) => setStatusMessage(msg)
+            );
+            textOutput = directRes.transcription?.text || '';
+            wordsOutput = directRes.transcription?.words || [];
+            segmentsOutput = directRes.transcription?.segments || [];
+          } else {
+            // Fallback ke Whistle In-Browser
+            setStatusMessage('Beralih ke fallback Whistle In-Browser...');
+            const browserRes = await transcribeInBrowser(
+              fileToUpload,
+              language,
+              template,
+              (msg, pct) => {
+                setStatusMessage(msg);
+                if (typeof pct === 'number' && pct > 0) setProgress(pct);
+              }
+            );
+            textOutput = browserRes.transcription?.text || '';
+            wordsOutput = browserRes.transcription?.words || [];
+            segmentsOutput = browserRes.transcription?.segments || [];
+          }
+        }
+      } else {
+        // Fallback jika tidak ada Groq Key: Whistle In-Browser
         clearInterval(progressInterval);
         setStatusMessage('Menjalankan Whistle ASR di laptop Anda...');
         const browserRes = await transcribeInBrowser(
@@ -96,55 +153,12 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
           template,
           (msg, pct) => {
             setStatusMessage(msg);
-            if (typeof pct === 'number' && pct > 0) {
-              setProgress(pct);
-            }
+            if (typeof pct === 'number' && pct > 0) setProgress(pct);
           }
         );
         textOutput = browserRes.transcription?.text || '';
         wordsOutput = browserRes.transcription?.words || [];
         segmentsOutput = browserRes.transcription?.segments || [];
-      } catch (inBrowserErr: any) {
-        console.warn('Komputasi lokal laptop mengalami kendala, mencoba fallback...', inBrowserErr);
-
-        // Fallback otomatis jika perangkat tidak mendukung Web Audio/Web Worker
-        if (activeApiKey) {
-          setStatusMessage('Beralih ke fallback cloud...');
-          const directRes = await processAudioWithGeminiDirect(
-            fileToUpload,
-            activeApiKey,
-            language,
-            template,
-            keywords,
-            (msg) => setStatusMessage(msg)
-          );
-          textOutput = directRes.transcription?.text || '';
-          wordsOutput = directRes.transcription?.words || [];
-          segmentsOutput = directRes.transcription?.segments || [];
-        } else if (activeBackendUrl && !activeBackendUrl.startsWith('http://localhost')) {
-          setStatusMessage('Beralih ke fallback backend daemon...');
-          const formData = new FormData();
-          formData.append('file', fileToUpload);
-          formData.append('language', language);
-          if (keywords) formData.append('keywords', keywords);
-
-          const cleanBaseUrl = activeBackendUrl.replace(/\/+$/, '');
-          const response = await fetch(`${cleanBaseUrl}/api/process`, {
-            method: 'POST',
-            body: formData
-          });
-
-          if (!response.ok) {
-            throw inBrowserErr;
-          }
-
-          const data: ProcessResponse = await response.json();
-          textOutput = data.transcription?.text || '';
-          wordsOutput = data.transcription?.words || [];
-          segmentsOutput = data.transcription?.segments || [];
-        } else {
-          throw inBrowserErr;
-        }
       }
 
       clearInterval(progressInterval);
@@ -160,7 +174,7 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
       }
     } catch (err: any) {
       console.error('Transcription error:', err);
-      setErrorMessage(err.message || 'Gagal memproses file audio di laptop Anda.');
+      setErrorMessage(err.message || 'Gagal memproses file audio.');
     } finally {
       clearInterval(progressInterval);
       setIsProcessing(false);
