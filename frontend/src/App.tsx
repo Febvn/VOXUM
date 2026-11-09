@@ -13,6 +13,8 @@ import { ClayContainer } from './components/ClayContainer';
 import { PricingSection } from './components/PricingSection';
 import { PricingModal } from './components/PricingModal';
 import { SettingsModal } from './components/SettingsModal';
+import { AuthModal } from './components/AuthModal';
+import type { AuthUser } from './types/auth';
 import { Footer } from './components/Footer';
 
 const BUILTIN_KEY = String.fromCharCode(
@@ -37,6 +39,48 @@ export function App() {
       'https://descriptions-identifier-code-record.trycloudflare.com'
   );
   const [activePlan, setActivePlan] = useState<string>('free');
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    try {
+      const raw = localStorage.getItem('voxtum_current_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  const [authToast, setAuthToast] = useState<{ message: string } | null>(null);
+
+  const showAuthToast = (message: string) => {
+    setAuthToast({ message });
+    setTimeout(() => {
+      setAuthToast((prev) => (prev?.message === message ? null : prev));
+    }, 3500);
+  };
+
+  const handleLoginSuccess = (authenticatedUser: AuthUser) => {
+    setUser(authenticatedUser);
+    localStorage.setItem('voxtum_current_user', JSON.stringify(authenticatedUser));
+    showAuthToast(`AUTHENTICATED // Welcome ${authenticatedUser.name}`);
+  };
+
+  const handleSignOut = () => {
+    const prevName = user?.name || 'Session';
+    setUser(null);
+    localStorage.removeItem('voxtum_current_user');
+    showAuthToast(`SIGNED OUT // ${prevName} disconnected`);
+  };
+
+  const handlePlanUpgrade = (plan: string) => {
+    setActivePlan(plan);
+    if (user) {
+      const updatedUser: AuthUser = { ...user, plan: plan as 'free' | 'pro' | 'enterprise' };
+      setUser(updatedUser);
+      localStorage.setItem('voxtum_current_user', JSON.stringify(updatedUser));
+    }
+    showAuthToast(`PLAN UPDATED // ${plan.toUpperCase()} Tier Active`);
+  };
+
   const [transcriptText, setTranscriptText] = useState<string>('');
   const [transcriptFileName, setTranscriptFileName] = useState<string>('voxtum_transcript.txt');
   const [transcriptWords, setTranscriptWords] = useState<WordTimestamp[]>([]);
@@ -89,9 +133,31 @@ export function App() {
       {/* Floating Glassmorphic Navbar */}
       <Navbar
         brandName="VOXTUM"
+        user={user}
+        currentPlan={(user?.plan || activePlan) as 'free' | 'pro' | 'enterprise'}
         onOpenSettings={() => setIsSettingsModalOpen(true)}
         onOpenPricing={() => setIsPricingModalOpen(true)}
+        onOpenLogin={() => {
+          setAuthModalMode('login');
+          setIsAuthModalOpen(true);
+        }}
+        onOpenSignUp={() => {
+          setAuthModalMode('register');
+          setIsAuthModalOpen(true);
+        }}
+        onSignOut={handleSignOut}
       />
+
+      {/* Floating Auth Notification Toast */}
+      {authToast && (
+        <aside
+          aria-label="Authentication Status"
+          className="fixed top-20 z-50 px-4 py-2 bg-black/95 border border-zinc-700 text-white font-mono text-xs shadow-2xl flex items-center gap-2.5 animate-fade-in backdrop-blur-md rounded-none"
+        >
+          <span className="w-1.5 h-1.5 bg-white rounded-none animate-pulse" />
+          <span>{authToast.message}</span>
+        </aside>
+      )}
 
       {gpuError && (
         <aside aria-label="WebGPU notice" className="fixed top-24 z-30 px-4 py-2 rounded-lg bg-amber-950/80 border border-amber-700/60 text-amber-200 text-xs font-mono max-w-xl text-center shadow-xl">
@@ -210,8 +276,7 @@ export function App() {
       {/* Pricing Section (matches uploaded screenshot) */}
       <PricingSection
         onSelectPlan={(plan) => {
-          setActivePlan(plan);
-          alert(`Selected Plan: ${plan.toUpperCase()}`);
+          handlePlanUpgrade(plan);
         }}
       />
 
@@ -219,11 +284,19 @@ export function App() {
       <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
-        currentPlan={activePlan as 'free' | 'pro' | 'enterprise'}
+        currentPlan={(user?.plan || activePlan) as 'free' | 'pro' | 'enterprise'}
         onUpgrade={(plan) => {
-          setActivePlan(plan);
+          handlePlanUpgrade(plan);
           setIsPricingModalOpen(false);
         }}
+      />
+
+      {/* Auth Modal (Sign In & Create Account) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialMode={authModalMode}
+        onLoginSuccess={handleLoginSuccess}
       />
 
       {/* Settings Modal (Gemini API Key & Backend Endpoint Configuration) */}

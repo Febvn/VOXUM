@@ -4,6 +4,7 @@ export interface AuthUser {
   email: string;
   avatarUrl?: string;
   provider: 'google' | 'voxtum';
+  plan?: 'free' | 'pro' | 'enterprise';
   createdAt: string;
 }
 

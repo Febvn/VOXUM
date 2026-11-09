@@ -244,12 +244,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </button>
 
         {/* Modal Top Metadata */}
-        <div className="mb-6 space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 border border-zinc-800 bg-zinc-950 px-2 py-0.5 rounded-none">
-              VOXTUM SECURITY
-            </span>
-            <span className="text-[10px] font-mono text-zinc-500">ID GATEWAY</span>
+        <div className="mb-5 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-300 border border-zinc-800 bg-zinc-950 px-2 py-0.5 rounded-none">
+                VOXTUM SECURITY
+              </span>
+              <span className="text-[10px] font-mono text-zinc-500">ID GATEWAY</span>
+            </div>
+            <span className="text-[10px] font-mono text-zinc-600 hidden sm:inline">v2.4 // AIR-GAPPED</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase font-mono">
@@ -259,11 +262,47 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </h2>
 
           <p className="text-xs text-zinc-400 leading-relaxed font-sans">
-            {mode === 'login' && 'Access speech processing sessions, saved audio models, and Pro features.'}
+            {mode === 'login' && 'Access speech processing sessions, saved audio models, and Pro compute features.'}
             {mode === 'register' && 'Set up your workspace to synchronize transcription logs and custom vocabularies.'}
             {mode === 'forgot_password' && 'Enter your email address and we will dispatch a secure recovery link.'}
           </p>
         </div>
+
+        {/* Segmented Design System Tab Switcher (Sign In vs Create Account) */}
+        {mode !== 'forgot_password' && (
+          <div className="flex items-center border border-zinc-800 bg-zinc-950/80 p-1 mb-5 rounded-none">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setError(null);
+                setSuccessNotice(null);
+              }}
+              className={`flex-1 py-2 text-xs font-mono font-semibold uppercase tracking-wider transition-all rounded-none ${
+                mode === 'login'
+                  ? 'bg-white text-black shadow-md'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              01 // Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setError(null);
+                setSuccessNotice(null);
+              }}
+              className={`flex-1 py-2 text-xs font-mono font-semibold uppercase tracking-wider transition-all rounded-none ${
+                mode === 'register'
+                  ? 'bg-white text-black shadow-md'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              02 // Create Account
+            </button>
+          </div>
+        )}
 
         {/* Error Notification */}
         {error && (

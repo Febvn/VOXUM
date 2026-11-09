@@ -60,12 +60,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPricing,
   onOpenLogin,
   onOpenSignIn,
+  onOpenSignUp,
   onSignOut,
   user = null,
   currentPlan = 'pro',
   brandName = 'VOXTUM',
 }) => {
   const handleLoginClick = onOpenLogin || onOpenSignIn;
+  const handleSignUpClick = onOpenSignUp || onOpenLogin || onOpenSignIn;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -231,13 +233,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </div>
             ) : (
-              <button
-                onClick={handleLoginClick}
-                type="button"
-                className="bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs px-4 py-1.5 rounded-none transition-colors duration-150 shadow-sm active:scale-95 uppercase font-mono tracking-wider"
-              >
-                Login
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleLoginClick}
+                  type="button"
+                  className="px-3 py-1.5 rounded-none border border-zinc-800 hover:border-zinc-500 bg-zinc-950/70 hover:bg-zinc-900 text-zinc-300 hover:text-white font-mono text-xs uppercase tracking-wider transition-all duration-150 active:scale-95"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={handleSignUpClick}
+                  type="button"
+                  className="px-3.5 py-1.5 rounded-none border border-white bg-white hover:bg-zinc-200 text-zinc-950 font-mono font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_15px_rgba(255,255,255,0.12)] active:scale-95 flex items-center gap-1.5"
+                >
+                  <span>Sign Up</span>
+                  <span className="text-[10px] text-zinc-600 font-bold">→</span>
+                </button>
+              </div>
             )}
 
             {/* Burger Button directly next to Login / User */}
@@ -266,13 +278,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="text-[9px] font-mono font-bold uppercase">{currentPlan.toUpperCase()}</span>
               </button>
             ) : (
-              <button
-                onClick={handleLoginClick}
-                type="button"
-                className="bg-white text-zinc-950 font-bold text-xs px-3 py-1 rounded-none font-mono uppercase tracking-wider"
-              >
-                Login
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleLoginClick}
+                  type="button"
+                  className="px-2.5 py-1 rounded-none border border-zinc-800 bg-zinc-950/80 text-zinc-300 hover:text-white font-mono text-[11px] uppercase tracking-wider active:scale-95"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={handleSignUpClick}
+                  type="button"
+                  className="px-2.5 py-1 rounded-none border border-white bg-white text-zinc-950 font-bold font-mono text-[11px] uppercase tracking-wider active:scale-95"
+                >
+                  Sign Up
+                </button>
+              </div>
             )}
 
             <button
@@ -349,9 +370,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setIsSidebarOpen(false);
                         handleLoginClick?.();
                       }}
-                      className="w-full py-2 bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider text-center rounded-none font-mono transition-colors"
+                      className="w-full py-2 bg-zinc-950 border border-zinc-800 hover:border-zinc-600 text-white font-medium text-xs uppercase tracking-wider text-center rounded-none font-mono transition-colors"
                     >
-                      Login / Register
+                      Sign In to Account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSidebarOpen(false);
+                        handleSignUpClick?.();
+                      }}
+                      className="w-full py-2 bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider text-center rounded-none font-mono transition-colors shadow-sm"
+                    >
+                      Create Free Account
                     </button>
                   </div>
                 )}
