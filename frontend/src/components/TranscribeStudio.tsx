@@ -6,7 +6,7 @@ import {
   Settings
 } from 'lucide-react';
 import type { MeetingTemplate, WordTimestamp } from '../types';
-import { generateDemoResponse, processAudioWithGeminiDirect } from '../services/apiService';
+import { processAudioWithGeminiDirect } from '../services/apiService';
 import { transcribeWithGroq, DEFAULT_GROQ_KEY } from '../services/groqService';
 import { transcribeInBrowser } from '../services/inBrowserWhistle';
 import { convertMediaToWav } from '../utils/mediaConverter';
@@ -36,7 +36,6 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
   onTranscriptionComplete
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [enableWebcamScan, setEnableWebcamScan] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [language, setLanguage] = useState<string>('auto');
@@ -198,39 +197,6 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
     }
   };
 
-  const loadSampleDemo = async () => {
-    if (isProcessing) return;
-    try {
-      const sampleUrl = language === 'id' ? '/samples/sample_bahasa_indonesia.mp3' : '/samples/sample_jfk.mp3';
-      const sampleName = language === 'id' ? 'sample_bahasa_indonesia.mp3' : 'sample_jfk.mp3';
-      const res = await fetch(sampleUrl);
-      if (!res.ok) throw new Error('Failed to load sample file');
-      const blob = await res.blob();
-      const file = new File([blob], sampleName, { type: 'audio/mpeg' });
-      await handleFileSelect(file);
-    } catch {
-      setIsProcessing(true);
-      setProgress(10);
-      const interval = setInterval(() => {
-        setProgress((prev) => (prev < 90 ? prev + 8 : prev));
-      }, 70);
-      await new Promise((r) => setTimeout(r, 600));
-      clearInterval(interval);
-      setProgress(100);
-      await new Promise((r) => setTimeout(r, 200));
-
-      const sample = generateDemoResponse(template, language);
-      onTranscriptionComplete?.(sample.transcription.text, 'sample_demo_audio.wav', sample.transcription.words);
-      setIsProcessing(false);
-      setProgress(0);
-
-      const el = document.getElementById('studio-grid-continuation');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
   return (
     <section
       id={id}
@@ -264,36 +230,12 @@ export const TranscribeStudio: React.FC<TranscribeStudioProps> = ({
               lineJitter={0.1}
               scanSoftness={0.7}
               scanOnClick
-              enableWebcam={enableWebcamScan}
+              enableWebcam={false}
               showFloorFlags={true}
               floorFlagRow={4.0}
               selectedLanguage={language}
               onSelectLanguage={(langCode) => setLanguage(langCode)}
             />
-          </div>
-
-          {/* Top-Right Utility Overlay in GridScan Viewport */}
-          <div className="absolute top-4 right-4 z-20 flex items-center gap-2.5 pointer-events-auto">
-            <button
-              type="button"
-              onClick={loadSampleDemo}
-              disabled={isProcessing}
-              className="text-[11px] font-mono px-3 py-1.5 rounded-none border border-zinc-800 bg-black/60 backdrop-blur-md text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors underline underline-offset-4 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Try Sample Audio ↗
-            </button>
-            <button
-              type="button"
-              onClick={() => setEnableWebcamScan((prev) => !prev)}
-              className={`text-[11px] font-mono px-2.5 py-1.5 rounded-none border backdrop-blur-md transition-colors ${
-                enableWebcamScan
-                  ? 'border-white bg-white/20 text-white font-medium'
-                  : 'border-zinc-800 bg-black/60 text-zinc-400 hover:text-white'
-              }`}
-              title="Toggle webcam face tracking on 3D grid"
-            >
-              {enableWebcamScan ? '● Webcam: ON' : '○ Webcam: OFF'}
-            </button>
           </div>
 
           {/* Error Notice Banner inside GridScan Viewport */}
